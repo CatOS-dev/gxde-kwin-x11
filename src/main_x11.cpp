@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
     signal(SIGPIPE, SIG_IGN);
 
     // enforce xcb plugin, unfortunately command line switch has precedence
-    setenv("QT_QPA_PLATFORM", "xcb", true);
+    setenv("QT_QPA_PLATFORM", "dxcb;xcb", true);
 
     // disable highdpi scaling
     setenv("QT_ENABLE_HIGHDPI_SCALING", "0", true);
