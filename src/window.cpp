@@ -1196,6 +1196,21 @@ bool Window::startInteractiveMoveResize()
     m_interactiveMoveResize.initialQuickTileMode = requestedQuickTileMode();
     m_interactiveMoveResize.initialGeometryRestore = geometryRestore();
 
+    m_splitMoveActive = isInteractiveMove() && isSplitWindow();
+    if (m_splitMoveActive) {
+        bool hasOtherSplitWindow = false;
+        for (Window *other : workspace()->windows()) {
+            if (other != this && other->output() == output() && other->isOnCurrentDesktop() && other->isSplitWindow()) {
+                hasOtherSplitWindow = true;
+                break;
+            }
+        }
+        m_splitMoveActive = hasOtherSplitWindow;
+        m_splitMoveArea = workspace()->clientArea(MaximizeArea, this);
+        m_splitMoveStartPosition = m_interactiveMoveResize.anchor;
+        m_splitMoveMode = quickTileMode();
+    }
+
     updateElectricGeometryRestore();
     checkUnrestrictedInteractiveMoveResize();
     Q_EMIT interactiveMoveResizeStarted();
@@ -1208,6 +1223,7 @@ bool Window::startInteractiveMoveResize()
 void Window::finishInteractiveMoveResize(bool cancel)
 {
     const bool wasMove = isInteractiveMove();
+    const bool wasSplitMove = wasMove && m_splitMoveActive;
     bool triggerSplitPreviewAfterMove = false;
     leaveInteractiveMoveResize();
 
@@ -1249,7 +1265,14 @@ void Window::finishInteractiveMoveResize(bool cancel)
     Q_EMIT interactiveMoveResizeFinished();
     if (!cancel && triggerSplitPreviewAfterMove && isSplitWindow()) {
         Q_EMIT triggerSplitPreview(this);
+    } else if (wasSplitMove && isSplitWindow()) {
+        if (cancel && m_splitMoveMode != m_interactiveMoveResize.initialQuickTileMode) {
+            Q_EMIT swapSplitWindow(this, 1);
+        }
+        Q_EMIT swapSplitWindow(this, 2);
     }
+    m_splitMoveActive = false;
+    m_splitMoveMode = QuickTileFlag::None;
 }
 
 // This function checks if it actually makes sense to perform a restricted move/resize.
@@ -1427,6 +1450,40 @@ void Window::updateInteractiveMoveResize(const QPointF &global, Qt::KeyboardModi
                             return;
                         }
                     }
+                } else if (m_splitMoveActive) {
+                    const qreal scale = output() ? output()->scale() : 1.0;
+                    const qreal tolerance = 10 * scale;
+                    const qreal horizontalTravel = std::max<qreal>(0, m_splitMoveArea.width() - initialInteractiveMoveResizeGeometry().width());
+                    const bool exitsVertically = std::abs(global.y() - m_splitMoveStartPosition.y()) > 50 * scale;
+                    bool exitsHorizontally = false;
+                    if (m_interactiveMoveResize.initialQuickTileMode == QuickTileMode(QuickTileFlag::Left)) {
+                        exitsHorizontally = global.x() < m_splitMoveStartPosition.x() - tolerance
+                            || global.x() > m_splitMoveStartPosition.x() + horizontalTravel + tolerance;
+                    } else {
+                        exitsHorizontally = global.x() > m_splitMoveStartPosition.x() + tolerance
+                            || global.x() < m_splitMoveStartPosition.x() - horizontalTravel - tolerance;
+                    }
+
+                    if (exitsVertically || exitsHorizontally) {
+                        m_splitMoveActive = false;
+                        m_splitMoveMode = QuickTileFlag::None;
+                        Q_EMIT swapSplitWindow(this, 0);
+                        setQuickTileModeAtCurrentPosition(QuickTileFlag::None);
+                        return;
+                    }
+
+                    move(nextMoveResizeGeom.topLeft());
+                    Q_EMIT interactiveMoveResizeStepped(nextMoveResizeGeom);
+                    if (nextMoveResizeGeom.center().x() < m_splitMoveArea.center().x()
+                        && m_splitMoveMode == QuickTileMode(QuickTileFlag::Right)) {
+                        Q_EMIT swapSplitWindow(this, 1);
+                        m_splitMoveMode = QuickTileFlag::Left;
+                    } else if (nextMoveResizeGeom.center().x() > m_splitMoveArea.center().x()
+                               && m_splitMoveMode == QuickTileMode(QuickTileFlag::Left)) {
+                        Q_EMIT swapSplitWindow(this, 1);
+                        m_splitMoveMode = QuickTileFlag::Right;
+                    }
+                    return;
                 } else if (quickTileMode() != QuickTileMode(QuickTileFlag::None)) {
                     setQuickTileModeAtCurrentPosition(QuickTileFlag::None);
                     return;

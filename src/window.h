@@ -1856,6 +1856,10 @@ protected:
     QRectF m_electricGeometryRestore;
     bool m_electricMaximizing = false;
     QTimer *m_electricMaximizingDelay = nullptr;
+    bool m_splitMoveActive = false;
+    QRectF m_splitMoveArea;
+    QPointF m_splitMoveStartPosition;
+    QuickTileMode m_splitMoveMode = QuickTileFlag::None;
 
     // geometry
     Output *m_moveResizeOutput = nullptr;

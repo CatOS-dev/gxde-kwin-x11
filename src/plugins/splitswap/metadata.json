@@ -1,0 +1,15 @@
+{
+    "KPlugin": {
+        "Category": "Window Management",
+        "Description": "Animate swapping the two split-screen sides",
+        "Description[zh_CN]": "窗口分屏交换",
+        "EnabledByDefault": true,
+        "Id": "splitswap",
+        "License": "GPL",
+        "Name": "Split-screen Swap",
+        "Name[zh_CN]": "窗口分屏交换"
+    },
+    "org.kde.kwin.effect": {
+        "internal": true
+    }
+}
