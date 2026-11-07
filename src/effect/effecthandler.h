@@ -334,6 +334,13 @@ public:
     QList<KWin::EffectWindow *> getChildWinList(KWin::EffectWindow *window) const;
     bool isTransientWin(KWin::EffectWindow *window) const;
     bool isShortcuts(QKeyEvent *event) const;
+    void setQuickTileWindow(KWin::EffectWindow *window, int mode);
+    int getQuickTileMode(KWin::EffectWindow *window) const;
+    QRectF getQuickTileGeometry(KWin::EffectWindow *window, int mode, const QPointF &pos) const;
+    bool isWinAllowSplit(KWin::EffectWindow *window) const;
+    bool isSplitWin(KWin::EffectWindow *window) const;
+    void updateQuickTileMode(KWin::EffectWindow *window, int mode);
+    void updateWindowTile(KWin::Output *screen);
 
     // Activities
     /**
@@ -1088,6 +1095,10 @@ Q_SIGNALS:
     void startupRemoved(const QString &id);
 
     void inputPanelChanged();
+
+    void windowFrameGeometryChanged(KWin::EffectWindow *window, const QRectF &oldGeometry);
+    void triggerSplitPreview(KWin::EffectWindow *window);
+    void swapSplitWin(KWin::EffectWindow *window, int index);
 
 public Q_SLOTS:
     // slots for D-Bus interface

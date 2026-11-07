@@ -1208,6 +1208,7 @@ bool Window::startInteractiveMoveResize()
 void Window::finishInteractiveMoveResize(bool cancel)
 {
     const bool wasMove = isInteractiveMove();
+    bool triggerSplitPreviewAfterMove = false;
     leaveInteractiveMoveResize();
 
     doFinishInteractiveMoveResize();
@@ -1233,6 +1234,7 @@ void Window::finishInteractiveMoveResize(bool cancel)
     if (isElectricBorderMaximizing()) {
         if (auto quickTileMode = std::get_if<QuickTileMode>(&m_electricMode.value())) {
             setQuickTileMode(*quickTileMode, m_interactiveMoveResize.anchor);
+            triggerSplitPreviewAfterMove = true;
         } else if (auto maximizeMode = std::get_if<MaximizeMode>(&m_electricMode.value())) {
             maximize(*maximizeMode, m_electricGeometryRestore);
         }
@@ -1245,6 +1247,9 @@ void Window::finishInteractiveMoveResize(bool cancel)
 
     m_interactiveMoveResize.counter++;
     Q_EMIT interactiveMoveResizeFinished();
+    if (!cancel && triggerSplitPreviewAfterMove && isSplitWindow()) {
+        Q_EMIT triggerSplitPreview(this);
+    }
 }
 
 // This function checks if it actually makes sense to perform a restricted move/resize.
@@ -3908,6 +3913,28 @@ QuickTileMode Window::quickTileMode() const
         return m_tile->quickTileMode();
     } else {
         return QuickTileFlag::None;
+    }
+}
+
+bool Window::isSplitWindow() const
+{
+    const QuickTileMode mode = quickTileMode();
+    return mode == QuickTileMode(QuickTileFlag::Left) || mode == QuickTileMode(QuickTileFlag::Right);
+}
+
+void Window::updateQuickTileMode(int mode)
+{
+    updateQuickTileMode(QuickTileMode(mode));
+}
+
+void Window::setQuickTileFromMenu(QuickTileMode mode, bool showPreview)
+{
+    setQuickTileMode(mode, frameGeometry().center());
+    if (workspace()->activeWindow() != this) {
+        workspace()->activateWindow(this, true);
+    }
+    if (showPreview && isSplitWindow()) {
+        Q_EMIT triggerSplitPreview(this);
     }
 }
 

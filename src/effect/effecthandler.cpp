@@ -300,10 +300,21 @@ void EffectsHandler::unloadAllEffects()
 
 void EffectsHandler::setupWindowConnections(Window *window)
 {
+    connect(window, &Window::frameGeometryChanged, this, [this, window](const QRectF &oldGeometry) {
+        if (window->effectWindow()) {
+            Q_EMIT windowFrameGeometryChanged(window->effectWindow(), oldGeometry);
+        }
+    });
     connect(window, &Window::closed, this, [this, window]() {
         if (window->effectWindow()) {
             Q_EMIT windowClosed(window->effectWindow());
         }
+    });
+    connect(window, &Window::triggerSplitPreview, this, [this](Window *window) {
+        Q_EMIT triggerSplitPreview(window->effectWindow());
+    });
+    connect(window, &Window::swapSplitWindow, this, [this](Window *window, int index) {
+        Q_EMIT swapSplitWin(window->effectWindow(), index);
     });
 }
 
@@ -904,6 +915,47 @@ bool EffectsHandler::isShortcuts(QKeyEvent *event) const
 {
     Q_UNUSED(event)
     return false;
+}
+
+void EffectsHandler::setQuickTileWindow(EffectWindow *effectWindow, int mode)
+{
+    if (effectWindow && effectWindow->window()->isClient()) {
+        Window *window = effectWindow->window();
+        window->setQuickTileMode(QuickTileMode(mode), window->frameGeometry().center());
+    }
+}
+
+int EffectsHandler::getQuickTileMode(EffectWindow *effectWindow) const
+{
+    return effectWindow && effectWindow->window()->isClient() ? int(effectWindow->window()->quickTileMode()) : 0;
+}
+
+QRectF EffectsHandler::getQuickTileGeometry(EffectWindow *effectWindow, int mode, const QPointF &pos) const
+{
+    return effectWindow && effectWindow->window()->isClient() ? effectWindow->window()->quickTileGeometry(QuickTileMode(mode), pos) : QRectF();
+}
+
+bool EffectsHandler::isWinAllowSplit(EffectWindow *effectWindow) const
+{
+    return effectWindow && effectWindow->window()->isClient() && effectWindow->window()->isResizable();
+}
+
+bool EffectsHandler::isSplitWin(EffectWindow *effectWindow) const
+{
+    return effectWindow && effectWindow->window()->isSplitWindow();
+}
+
+void EffectsHandler::updateQuickTileMode(EffectWindow *effectWindow, int mode)
+{
+    if (effectWindow && effectWindow->window()->isClient()) {
+        effectWindow->window()->updateQuickTileMode(mode);
+    }
+}
+
+void EffectsHandler::updateWindowTile(Output *screen)
+{
+    Q_UNUSED(screen)
+    // KWin 6 updates tile geometry when the requested tile changes.
 }
 
 QString EffectsHandler::currentActivity() const

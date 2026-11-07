@@ -1131,6 +1131,10 @@ public:
     void setQuickTileMode(QuickTileMode mode, const QPointF &tileAtPoint);
     QuickTileMode quickTileMode() const;
     QuickTileMode requestedQuickTileMode() const;
+    bool isSplitWindow() const;
+    void setQuickTileFromMenu(QuickTileMode mode, bool showPreview);
+    QRectF quickTileGeometry(QuickTileMode mode, const QPointF &pos) const;
+    void updateQuickTileMode(int mode);
 
     void handleCustomQuickTileShortcut(QuickTileMode mode);
 
@@ -1490,6 +1494,8 @@ Q_SIGNALS:
     void nextTargetScaleChanged();
     void noBorderChanged();
     void borderRadiusChanged();
+    void triggerSplitPreview(KWin::Window *window);
+    void swapSplitWindow(KWin::Window *window, int index);
 
 protected:
     Window();
@@ -1596,7 +1602,6 @@ protected:
     }
     void updateElectricGeometryRestore();
     QRectF quickTileGeometryRestore() const;
-    QRectF quickTileGeometry(QuickTileMode mode, const QPointF &pos) const;
     void updateQuickTileMode(QuickTileMode newMode);
 
     // geometry handling
