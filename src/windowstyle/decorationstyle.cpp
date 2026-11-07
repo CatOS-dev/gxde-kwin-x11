@@ -109,6 +109,11 @@ qreal DecorationStyle::windowStartUpEffect() const
     return m_windowStartUpEffect;
 }
 
+bool DecorationStyle::noTitleBar() const
+{
+    return m_noTitleBar;
+}
+
 DecorationStyle::EffectScenes DecorationStyle::effectScenes() const
 {
     return EffectScenes::fromInt(static_cast<int>(m_windowEffect));
@@ -199,11 +204,21 @@ void DecorationStyle::syncX11Properties()
     if (propertyIsValid(WindowStartUpEffectProperty)) {
         setWindowStartUpEffect(property("windowStartUpEffect").toDouble());
     }
+    if (property("noTitleBar").isValid()) {
+        setNoTitleBar(property("noTitleBar").toBool());
+    }
 
 #if KWIN_BUILD_X11
     const xcb_window_t windowId = x11WindowId(m_window);
     if (!atoms || windowId == XCB_WINDOW_NONE) {
         return;
+    }
+
+    Xcb::Property noTitleBar(false, windowId, atoms->deepin_no_titlebar, XCB_ATOM_CARDINAL, 0, 1);
+    if (const auto value = noTitleBar.value<const quint32 *>()) {
+        setNoTitleBar(*value != 0);
+    } else {
+        setNoTitleBar(false);
     }
 
     if (!propertyIsValid(WindowEffectProperty)) {
@@ -277,6 +292,7 @@ GXDE_STYLE_SETTER(setShadowColor, m_shadowColor, shadowColorChanged, const QColo
 GXDE_STYLE_SETTER(setMouseInputAreaMargins, m_mouseInputAreaMargins, mouseInputAreaMarginsChanged, const QMarginsF &)
 GXDE_STYLE_SETTER(setWindowPixelRatio, m_windowPixelRatio, windowPixelRatioChanged, qreal)
 GXDE_STYLE_SETTER(setWindowStartUpEffect, m_windowStartUpEffect, windowStartUpEffectChanged, qreal)
+GXDE_STYLE_SETTER(setNoTitleBar, m_noTitleBar, noTitleBarChanged, bool)
 
 #undef GXDE_STYLE_SETTER
 

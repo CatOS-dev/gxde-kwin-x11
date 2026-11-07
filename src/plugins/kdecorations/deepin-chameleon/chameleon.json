@@ -1,0 +1,17 @@
+{
+    "KPlugin": {
+        "Description": "Chameleon window decoration for the GXDE Desktop",
+        "Description[zh_CN]": "GXDE 变色龙窗口装饰主题",
+        "EnabledByDefault": true,
+        "Id": "com.gxde.chameleon",
+        "Name": "Chameleon",
+        "Name[zh_CN]": "变色龙",
+        "ServiceTypes": [
+            "org.kde.kdecoration3"
+        ]
+    },
+    "org.kde.kdecoration3": {
+        "blur": false,
+        "kcmodule": false
+    }
+}

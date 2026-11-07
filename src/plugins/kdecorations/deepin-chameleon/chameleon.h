@@ -1,0 +1,126 @@
+/*
+ * Copyright (C) 2017 ~ 2019 Deepin Technology Co., Ltd.
+ *
+ * Author:     zccrs <zccrs@live.com>
+ *
+ * Maintainer: zccrs <zhangjide@deepin.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+#ifndef CHAMELEON_H
+#define CHAMELEON_H
+
+#include "chameleontheme.h"
+#include "effect/effectwindow.h"
+
+#include <KDecoration3/Decoration>
+#include <KDecoration3/DecorationButtonGroup>
+
+#include <QFont>
+#include <QPainterPath>
+#include <QPointer>
+#include <QVariant>
+
+class Settings;
+class ChameleonWindowTheme;
+namespace KWin
+{
+class Window;
+}
+class Chameleon : public KDecoration3::Decoration
+{
+    Q_OBJECT
+
+public:
+    explicit Chameleon(QObject *parent = nullptr, const QVariantList &args = QVariantList());
+    ~Chameleon();
+
+    bool init() override;
+    void paint(QPainter *painter, const QRectF &repaintArea) override;
+
+    const ChameleonTheme::ThemeConfig *themeConfig() const;
+    KWin::EffectWindow *effect() const;
+    KWin::Window *kwinWindow() const;
+    uint32_t windowId() const;
+    bool noTitleBar() const;
+
+    qreal borderWidth() const;
+    qreal titleBarHeight() const;
+    qreal shadowRadius() const;
+    QPointF shadowOffset() const;
+    QPointF windowRadius() const;
+    QMarginsF mouseInputAreaMargins() const;
+
+    QColor shadowColor() const;
+    QColor borderColor() const;
+    QColor getBackgroundColor() const;
+
+    QIcon menuIcon() const;
+    QIcon minimizeIcon() const;
+    QIcon maximizeIcon() const;
+    QIcon unmaximizeIcon() const;
+    QIcon closeIcon() const;
+
+    QPointF menuIconPos() const;
+    qint32 menuIconWidth() const;
+    qint32 menuIconHeight() const;
+
+Q_SIGNALS:
+    void noTitleBarChanged(bool noTitleBar);
+    void effectInitialized(KWin::EffectWindow *effect);
+
+private Q_SLOTS:
+    void handleTitlebarHeightChanged();
+
+private:
+    void initButtons();
+    void updateButtonsGeometry();
+
+    void updateTitleGeometry();
+
+    void updateTheme();
+    void updateConfig();
+    void updateTitleBarArea();
+    void updateBorderPath();
+    void updateShadow();
+    void updateMouseInputAreaMargins();
+
+    void onClientWidthChanged();
+    void onClientHeightChanged();
+
+    bool windowNeedRadius() const;
+    bool windowNeedBorder() const;
+
+    QColor getTextColor() const;
+
+    bool m_initialized = false;
+    KWin::Window *m_window = nullptr;
+
+    QMarginsF m_titleBarAreaMargins;
+    QPainterPath m_borderPath;
+    ChameleonTheme::ConfigGroup *m_configGroup = nullptr;
+    ChameleonTheme::ThemeConfig *m_config = nullptr;
+    ChameleonWindowTheme *m_theme = nullptr;
+
+    QString m_title;
+    QRectF m_titleArea;
+
+    KDecoration3::DecorationButtonGroup *m_leftButtons = nullptr;
+    KDecoration3::DecorationButtonGroup *m_rightButtons = nullptr;
+
+    QPointer<KWin::EffectWindow> m_effect;
+    QFont m_font;
+};
+
+#endif // CHAMELEON_H

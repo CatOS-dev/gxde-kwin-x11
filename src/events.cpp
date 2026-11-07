@@ -786,7 +786,8 @@ void X11Window::propertyNotifyEvent(xcb_property_notify_event_t *e)
             getWmClientLeader();
         } else if (e->atom == atoms->kde_net_wm_shadow) {
             updateShadow();
-        } else if (e->atom == atoms->deepin_net_effect
+        } else if (e->atom == atoms->deepin_no_titlebar
+                   || e->atom == atoms->deepin_net_effect
                    || e->atom == atoms->deepin_net_radius
                    || e->atom == atoms->deepin_net_shadow
                    || e->atom == atoms->deepin_scissor_window) {

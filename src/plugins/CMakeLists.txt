@@ -46,6 +46,7 @@ function(kwin_add_script name source)
 endfunction()
 
 add_subdirectory(private)
+add_subdirectory(kdecorations)
 
 add_subdirectory(backgroundcontrast)
 add_subdirectory(alttabthumbnaillist)

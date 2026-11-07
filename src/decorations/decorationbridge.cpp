@@ -38,13 +38,10 @@ namespace Decoration
 {
 
 static const QString s_aurorae = QStringLiteral("org.kde.kwin.aurorae");
-static const QString s_pluginName = QStringLiteral("org.kde.kdecoration3");
+static const QString s_systemPluginNamespace = QStringLiteral("org.kde.kdecoration3");
+static const QString s_privatePluginNamespace = KWIN_PLUGINDIR + QStringLiteral("/org.kde.kdecoration3");
 static const QString s_configKeyName = QStringLiteral("org.kde.kdecoration2");
-#if HAVE_BREEZE_DECO
-static const QString s_defaultPlugin = BREEZE_KDECORATION_PLUGIN_ID;
-#else
-static const QString s_defaultPlugin = s_aurorae;
-#endif
+static const QString s_defaultPlugin = QStringLiteral("com.gxde.chameleon");
 
 static void migrateAuroraeTheme()
 {
@@ -73,7 +70,10 @@ DecorationBridge::DecorationBridge()
 
 QString DecorationBridge::readPlugin()
 {
-    return kwinApp()->config()->group(s_configKeyName).readEntry("library", s_defaultPlugin);
+    const QString plugin = kwinApp()->config()->group(s_configKeyName).readEntry("library", s_defaultPlugin);
+    // Existing Deepin sessions used the KDecoration2 id. Keep those settings
+    // working while loading the isolated KDecoration3 port.
+    return plugin == QLatin1String("com.deepin.chameleon") ? s_defaultPlugin : plugin;
 }
 
 static bool readNoPlugin()
@@ -130,7 +130,10 @@ void DecorationBridge::init()
 
 bool DecorationBridge::initPlugin()
 {
-    const KPluginMetaData metaData = KPluginMetaData::findPluginById(s_pluginName, m_plugin);
+    KPluginMetaData metaData = KPluginMetaData::findPluginById(s_privatePluginNamespace, m_plugin);
+    if (!metaData.isValid()) {
+        metaData = KPluginMetaData::findPluginById(s_systemPluginNamespace, m_plugin);
+    }
     if (!metaData.isValid()) {
         qCWarning(KWIN_DECORATIONS) << "Could not locate decoration plugin" << m_plugin;
         return false;
@@ -205,7 +208,7 @@ void DecorationBridge::loadMetaData(const QJsonObject &object)
     m_defaultTheme = QString();
 
     // load the settings
-    const QJsonValue decoSettings = object.value(s_pluginName);
+    const QJsonValue decoSettings = object.value(s_systemPluginNamespace);
     if (decoSettings.isUndefined()) {
         // no settings
         return;

@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "kwin_export.h"
+
 #include <QColor>
 #include <QMarginsF>
 #include <QObject>
@@ -16,7 +18,7 @@ namespace KWin
 
 class Window;
 
-class DecorationStyle : public QObject
+class KWIN_EXPORT DecorationStyle : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(qint64 validProperties READ validProperties WRITE setValidProperties NOTIFY validPropertiesChanged)
@@ -31,6 +33,7 @@ class DecorationStyle : public QObject
     Q_PROPERTY(qreal windowPixelRatio READ windowPixelRatio WRITE setWindowPixelRatio NOTIFY windowPixelRatioChanged)
     Q_PROPERTY(qint64 windowEffect READ windowEffect WRITE setWindowEffect NOTIFY windowEffectChanged)
     Q_PROPERTY(qreal windowStartUpEffect READ windowStartUpEffect WRITE setWindowStartUpEffect NOTIFY windowStartUpEffectChanged)
+    Q_PROPERTY(bool noTitleBar READ noTitleBar WRITE setNoTitleBar NOTIFY noTitleBarChanged)
 
 public:
     enum PropertyFlag : int {
@@ -77,6 +80,7 @@ public:
     qreal windowPixelRatio() const;
     qint64 windowEffect() const;
     qreal windowStartUpEffect() const;
+    bool noTitleBar() const;
     EffectScenes effectScenes() const;
 
     bool isCancelShadow() const;
@@ -99,6 +103,7 @@ public Q_SLOTS:
     void setWindowPixelRatio(qreal ratio);
     void setWindowEffect(qint64 effect);
     void setWindowStartUpEffect(qreal effect);
+    void setNoTitleBar(bool noTitleBar);
 
 Q_SIGNALS:
     void validPropertiesChanged(qint64 properties);
@@ -113,6 +118,7 @@ Q_SIGNALS:
     void windowPixelRatioChanged();
     void windowEffectChanged();
     void windowStartUpEffectChanged();
+    void noTitleBarChanged();
 
 private:
     QPointF variantToPoint(const QVariant &value, const QPointF &fallback = QPointF()) const;
@@ -135,6 +141,7 @@ private:
     bool m_cancelRadius = false;
     bool m_x11RadiusProperty = false;
     bool m_x11ShadowProperty = false;
+    bool m_noTitleBar = false;
 };
 
 } // namespace KWin
