@@ -35,6 +35,8 @@
 #endif
 // Qt
 #include <QAction>
+#include <QDBusConnection>
+#include <QDBusMessage>
 #include <QKeyEvent>
 // KDE
 #include <KConfig>
@@ -1137,6 +1139,11 @@ void TabBox::close(bool abort)
 
     input()->keyboard()->update();
     input()->pointer()->setEnableConstraints(true);
+
+    QDBusMessage message = QDBusMessage::createSignal(QStringLiteral("/KWin"),
+                                                      QStringLiteral("org.kde.KWin"),
+                                                      QStringLiteral("tabboxClosed"));
+    QDBusConnection::sessionBus().send(message);
 }
 
 void TabBox::accept(bool closeTabBox)

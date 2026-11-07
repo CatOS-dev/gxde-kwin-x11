@@ -25,6 +25,9 @@
 #include "virtualdesktops.h"
 #include "window.h"
 #include "workspace.h"
+#if KWIN_BUILD_X11
+#include "x11window.h"
+#endif
 #if KWIN_BUILD_ACTIVITIES
 #include "activities.h"
 #endif
@@ -202,6 +205,20 @@ QVariantMap DBusInterface::getWindowInfo(const QString &uuid)
     } else {
         return {};
     }
+}
+
+bool DBusInterface::isOnCurrentDesktop(int window)
+{
+#if KWIN_BUILD_X11
+    if (window == 0) {
+        return false;
+    }
+    const auto x11Window = workspace()->findClient(Predicate::WindowMatch, static_cast<xcb_window_t>(static_cast<quint32>(window)));
+    return x11Window && x11Window->isOnCurrentDesktop();
+#else
+    Q_UNUSED(window)
+    return false;
+#endif
 }
 
 void DBusInterface::showDesktop(bool show)

@@ -90,9 +90,14 @@ public Q_SLOTS: // METHODS
     QVariantMap getWindowInfo(const QString &uuid);
 
     Q_NOREPLY void showDesktop(bool show);
+    bool isOnCurrentDesktop(int window);
 
 Q_SIGNALS:
     void showingDesktopChanged(bool showing);
+    void ShowingDesktopStateChanged(bool showing);
+    void MultitaskStateChanged(bool active);
+    void SplitScreenStateChanged(bool active);
+    void tabboxClosed();
 
 private Q_SLOTS:
     void onShowingDesktopChanged(bool show, bool /*animated*/);

@@ -58,5 +58,19 @@
     <signal name="showingDesktopChanged">
         <arg name="showing" type="b" direction="out"/>
     </signal>
+    <method name="isOnCurrentDesktop">
+        <arg name="window" type="i" direction="in"/>
+        <arg name="onCurrentDesktop" type="b" direction="out"/>
+    </method>
+    <signal name="ShowingDesktopStateChanged">
+        <arg name="showing" type="b" direction="out"/>
+    </signal>
+    <signal name="MultitaskStateChanged">
+        <arg name="active" type="b" direction="out"/>
+    </signal>
+    <signal name="SplitScreenStateChanged">
+        <arg name="active" type="b" direction="out"/>
+    </signal>
+    <signal name="tabboxClosed"/>
   </interface>
 </node>

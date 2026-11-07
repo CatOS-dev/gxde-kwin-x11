@@ -10,10 +10,14 @@
 // KWin
 #include "compositor.h"
 #include "core/output.h"
+#include "tabbox.h"
 #include "tabboxhandler.h"
+#include "window.h"
 #include "workspace.h"
 // Qt
 #include <QAbstractItemModel>
+#include <QDBusConnection>
+#include <QDBusMessage>
 
 namespace KWin
 {
@@ -84,6 +88,17 @@ void SwitcherItem::setCurrentIndex(int index)
         tabBox->setCurrentIndex(m_model->index(index, 0));
     }
     Q_EMIT currentIndexChanged(m_currentIndex);
+
+    TabBox *controller = workspace()->tabbox();
+    if (controller && controller->isDisplayed()) {
+        if (Window *window = controller->currentClient()) {
+            QDBusMessage message = QDBusMessage::createSignal(QStringLiteral("/KWin"),
+                                                              QStringLiteral("org.kde.KWin"),
+                                                              QStringLiteral("ShowingDesktopStateChanged"));
+            message << window->isDesktop();
+            QDBusConnection::sessionBus().send(message);
+        }
+    }
 }
 
 void SwitcherItem::setAllDesktops(bool all)
