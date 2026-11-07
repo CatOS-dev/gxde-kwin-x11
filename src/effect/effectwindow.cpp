@@ -217,11 +217,13 @@ void EffectWindow::unrefVisibleEx(int reason)
 void EffectWindow::setScissorForce(bool force)
 {
     d->m_window->setProperty("gxdeScissorForce", force);
+    setData(WindowScissorForceRole, force ? QVariant(true) : QVariant());
+    addRepaintFull();
 }
 
 bool EffectWindow::isScissorForce() const
 {
-    return d->m_window->property("gxdeScissorForce").toBool();
+    return data(WindowScissorForceRole).toBool() || d->m_window->property("gxdeScissorForce").toBool();
 }
 
 bool EffectWindow::isWaterMark() const

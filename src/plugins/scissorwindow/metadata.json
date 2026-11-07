@@ -1,0 +1,15 @@
+{
+    "KPlugin": {
+        "Category": "Appearance",
+        "Description": "Clips window contents to Deepin window radius and custom paths",
+        "Description[zh_CN]": "按照 Deepin 窗口圆角和自定义路径裁剪窗口内容",
+        "EnabledByDefault": true,
+        "Id": "scissor",
+        "License": "GPL-3.0-or-later",
+        "Name": "Scissor Window",
+        "Name[zh_CN]": "窗口圆角"
+    },
+    "org.kde.kwin.effect": {
+        "enabledByDefaultMethod": true
+    }
+}
