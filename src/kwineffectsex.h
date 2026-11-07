@@ -5,12 +5,15 @@
 
 #include "effect/effectframe.h"
 #include "effect/effecthandler.h"
+#include "plugins/slideback/motionmanager.h"
 
 namespace KWin
 {
 
 using EffectFrameEx = EffectFrame;
 using EffectsHandlerEx = EffectsHandler;
+using EffectScreen = Output;
+using EffectWindowList = QList<EffectWindow *>;
 
 extern KWIN_EXPORT EffectsHandler *effectsEx;
 

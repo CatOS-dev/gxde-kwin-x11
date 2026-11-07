@@ -177,9 +177,61 @@ bool EffectWindow::isOnDesktop(VirtualDesktop *desktop) const
     return ds.isEmpty() || ds.contains(desktop);
 }
 
+bool EffectWindow::isOnDesktop(int desktop) const
+{
+    return isOnDesktop(effects->desktopForNumber(desktop));
+}
+
 bool EffectWindow::isOnAllDesktops() const
 {
     return desktops().isEmpty();
+}
+
+int EffectWindow::desktop() const
+{
+    const QList<VirtualDesktop *> windowDesktops = desktops();
+    return windowDesktops.isEmpty() ? -1 : windowDesktops.constFirst()->x11DesktopNumber();
+}
+
+QVector<uint> EffectWindow::desktopIds() const
+{
+    QVector<uint> result;
+    const QList<VirtualDesktop *> windowDesktops = desktops();
+    result.reserve(windowDesktops.size());
+    for (const VirtualDesktop *desktop : windowDesktops) {
+        result.append(desktop->x11DesktopNumber());
+    }
+    return result;
+}
+
+void EffectWindow::refVisibleEx(int reason)
+{
+    d->m_windowItem->refVisible(reason);
+}
+
+void EffectWindow::unrefVisibleEx(int reason)
+{
+    d->m_windowItem->unrefVisible(reason);
+}
+
+void EffectWindow::setScissorForce(bool force)
+{
+    d->m_window->setProperty("gxdeScissorForce", force);
+}
+
+bool EffectWindow::isScissorForce() const
+{
+    return d->m_window->property("gxdeScissorForce").toBool();
+}
+
+bool EffectWindow::isWaterMark() const
+{
+    return d->m_window->property("gxdeWaterMark").toBool();
+}
+
+bool EffectWindow::isCurrentTab() const
+{
+    return true;
 }
 
 bool EffectWindow::hasDecoration() const

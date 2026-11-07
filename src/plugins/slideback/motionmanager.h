@@ -190,6 +190,7 @@ public:
      * Effect::PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS flag.
      */
     void calculate(int time);
+    void calculate(int time, bool motionEffectEnable);
     /**
      * Modify a registered window's paint data to make it appear
      * at its real location on the screen. Usually called in
@@ -295,6 +296,19 @@ public:
         return m_movingWindowsSet.contains(w);
     }
 
+    QList<EffectWindow *> orderManagedWindows() const
+    {
+        return m_orderWindowList;
+    }
+
+    void setWindowFill(EffectWindow *w, bool fill, const QRect &rect);
+    bool isWindowFill(EffectWindow *w) const;
+    QRect getWindowFillRect(EffectWindow *w) const;
+    void resetWindowFill(EffectWindow *w);
+
+    void setWindowRadius(EffectWindow *w, qreal radius);
+    qreal getWindowRadius(EffectWindow *w) const;
+
 private:
     bool m_useGlobalAnimationModifier;
     struct WindowMotion
@@ -302,9 +316,13 @@ private:
         // TODO: Rotation, etc?
         Motion2D translation; // Absolute position
         Motion2D scale; // xScale and yScale
+        bool fill = false;
+        QRect fillRect;
+        qreal radius = 0;
     };
     QHash<EffectWindow *, WindowMotion> m_managedWindows;
     QSet<EffectWindow *> m_movingWindowsSet;
+    QList<EffectWindow *> m_orderWindowList;
 };
 
 template<typename T>

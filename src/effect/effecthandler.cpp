@@ -29,6 +29,7 @@
 #include "inputmethod.h"
 #include "inputpanelv1window.h"
 #include "keyboard_input.h"
+#include "mousebuttons.h"
 #include "opengl/glshader.h"
 #include "opengl/glshadermanager.h"
 #include "opengl/gltexture.h"
@@ -61,6 +62,7 @@
 #include <KDecoration3/DecorationSettings>
 
 #include <QFontMetrics>
+#include <QGuiApplication>
 #include <QMatrix4x4>
 #include <QMouseEvent>
 #include <QPainter>
@@ -324,6 +326,7 @@ void EffectsHandler::paintScreen(const RenderTarget &renderTarget, const RenderV
 {
     m_currentRenderTarget = &renderTarget;
     m_currentRenderViewport = &viewport;
+    m_currentPaintingScreen = screen;
     if (m_currentPaintScreenIterator != m_activeEffects.constEnd()) {
         (*m_currentPaintScreenIterator++)->paintScreen(renderTarget, viewport, mask, region, screen);
         --m_currentPaintScreenIterator;
@@ -375,6 +378,13 @@ void EffectsHandler::paintWindow(const RenderTarget &renderTarget, const RenderV
     }
 }
 
+void EffectsHandler::paintWindow(EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data)
+{
+    Q_ASSERT(m_currentRenderTarget);
+    Q_ASSERT(m_currentRenderViewport);
+    paintWindow(*m_currentRenderTarget, *m_currentRenderViewport, w, mask, region, data);
+}
+
 void EffectsHandler::postPaintWindow(EffectWindow *w)
 {
     if (m_currentPaintWindowIterator != m_activeEffects.constEnd()) {
@@ -404,9 +414,23 @@ void EffectsHandler::drawWindow(const RenderTarget &renderTarget, const RenderVi
     }
 }
 
+void EffectsHandler::drawWindow(EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data)
+{
+    Q_ASSERT(m_currentRenderTarget);
+    Q_ASSERT(m_currentRenderViewport);
+    drawWindow(*m_currentRenderTarget, *m_currentRenderViewport, w, mask, region, data);
+}
+
 void EffectsHandler::renderWindow(const RenderTarget &renderTarget, const RenderViewport &viewport, EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data)
 {
     m_scene->finalDrawWindow(renderTarget, viewport, w, mask, region, data);
+}
+
+void EffectsHandler::renderWindow(EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data)
+{
+    Q_ASSERT(m_currentRenderTarget);
+    Q_ASSERT(m_currentRenderViewport);
+    renderWindow(*m_currentRenderTarget, *m_currentRenderViewport, w, mask, region, data);
 }
 
 bool EffectsHandler::hasDecorationShadows() const
@@ -424,6 +448,7 @@ void EffectsHandler::startPaint()
 {
     m_currentRenderTarget = nullptr;
     m_currentRenderViewport = nullptr;
+    m_currentPaintingScreen = nullptr;
     m_activeEffects.clear();
     m_activeEffects.reserve(loaded_effects.count());
     for (QList<KWin::EffectPair>::const_iterator it = loaded_effects.constBegin(); it != loaded_effects.constEnd(); ++it) {
@@ -804,6 +829,18 @@ void EffectsHandler::windowToDesktops(EffectWindow *w, const QList<VirtualDeskto
     window->setDesktops(desktops);
 }
 
+void EffectsHandler::windowToDesktops(EffectWindow *w, const QVector<uint> &desktopIds)
+{
+    QList<VirtualDesktop *> targetDesktops;
+    targetDesktops.reserve(desktopIds.size());
+    for (uint desktopId : desktopIds) {
+        if (VirtualDesktop *desktop = VirtualDesktopManager::self()->desktopForX11Id(desktopId)) {
+            targetDesktops.append(desktop);
+        }
+    }
+    windowToDesktops(w, targetDesktops);
+}
+
 void EffectsHandler::windowToScreen(EffectWindow *w, Output *screen)
 {
     auto window = w->window();
@@ -815,6 +852,58 @@ void EffectsHandler::windowToScreen(EffectWindow *w, Output *screen)
 void EffectsHandler::setShowingDesktop(bool showing)
 {
     Workspace::self()->setShowingDesktop(showing);
+}
+
+QString EffectsHandler::getActiveColor() const
+{
+    return QStringLiteral("#0081ff");
+}
+
+void EffectsHandler::setKeepAbove(EffectWindow *effectWindow, bool keepAbove)
+{
+    if (effectWindow && effectWindow->window()->isClient()) {
+        effectWindow->window()->setKeepAbove(keepAbove);
+    }
+}
+
+void EffectsHandler::sendPointer(const QPointF &pos, Qt::MouseButton button)
+{
+    if (!input() || !input()->pointer()) {
+        return;
+    }
+    const QPointF previousPos = input()->pointer()->pos();
+    const uint32_t nativeButton = qtMouseButtonToButton(button);
+    input()->pointer()->processMotionAbsolute(pos, std::chrono::microseconds::zero());
+    input()->pointer()->processButton(nativeButton, PointerButtonState::Pressed, std::chrono::microseconds::zero());
+    input()->pointer()->processButton(nativeButton, PointerButtonState::Released, std::chrono::microseconds::zero());
+    input()->pointer()->processMotionAbsolute(previousPos, std::chrono::microseconds::zero());
+}
+
+QList<EffectWindow *> EffectsHandler::getChildWinList(EffectWindow *effectWindow) const
+{
+    QList<EffectWindow *> result;
+    if (!effectWindow) {
+        return result;
+    }
+    const QList<Window *> transients = effectWindow->window()->transients();
+    result.reserve(transients.size());
+    for (Window *transient : transients) {
+        if (transient->effectWindow()) {
+            result.append(transient->effectWindow());
+        }
+    }
+    return result;
+}
+
+bool EffectsHandler::isTransientWin(EffectWindow *effectWindow) const
+{
+    return effectWindow && effectWindow->window()->isTransient();
+}
+
+bool EffectsHandler::isShortcuts(QKeyEvent *event) const
+{
+    Q_UNUSED(event)
+    return false;
 }
 
 QString EffectsHandler::currentActivity() const
@@ -834,14 +923,41 @@ VirtualDesktop *EffectsHandler::currentDesktop() const
     return VirtualDesktopManager::self()->currentDesktop();
 }
 
+int EffectsHandler::currentDesktopNumber() const
+{
+    return VirtualDesktopManager::self()->current();
+}
+
 QList<VirtualDesktop *> EffectsHandler::desktops() const
 {
     return VirtualDesktopManager::self()->desktops();
 }
 
+int EffectsHandler::numberOfDesktops() const
+{
+    return VirtualDesktopManager::self()->count();
+}
+
+VirtualDesktop *EffectsHandler::desktopForNumber(int desktop) const
+{
+    return VirtualDesktopManager::self()->desktopForX11Id(desktop);
+}
+
 void EffectsHandler::setCurrentDesktop(VirtualDesktop *desktop)
 {
     VirtualDesktopManager::self()->setCurrent(desktop);
+}
+
+void EffectsHandler::setCurrentDesktop(int desktop)
+{
+    if (VirtualDesktop *target = desktopForNumber(desktop)) {
+        setCurrentDesktop(target);
+    }
+}
+
+void EffectsHandler::setNumberOfDesktops(int count)
+{
+    VirtualDesktopManager::self()->setCount(std::max(1, count));
 }
 
 QSize EffectsHandler::desktopGridSize() const
@@ -1076,6 +1192,11 @@ Output *EffectsHandler::activeScreen() const
 QRectF EffectsHandler::clientArea(clientAreaOption opt, const Output *screen, const VirtualDesktop *desktop) const
 {
     return Workspace::self()->clientArea(opt, screen, desktop);
+}
+
+QRectF EffectsHandler::clientArea(clientAreaOption opt, const Output *screen, int desktop) const
+{
+    return clientArea(opt, screen, desktopForNumber(desktop));
 }
 
 QRectF EffectsHandler::clientArea(clientAreaOption opt, const EffectWindow *effectWindow) const
@@ -1614,6 +1735,28 @@ Output *EffectsHandler::findScreen(const QString &name) const
 Output *EffectsHandler::findScreen(int screenId) const
 {
     return Workspace::self()->outputs().value(screenId);
+}
+
+Output *EffectsHandler::findScreen(Output *output) const
+{
+    return output;
+}
+
+Output *EffectsHandler::getCurrentPaintingScreen() const
+{
+    return m_currentPaintingScreen;
+}
+
+qreal EffectsHandler::getOsScale() const
+{
+    const QScreen *screen = QGuiApplication::primaryScreen();
+    return screen ? std::max<qreal>(1.0, screen->logicalDotsPerInch() / 96.0) : 1.0;
+}
+
+qreal EffectsHandler::getOsRadius() const
+{
+    // The Deepin window-style port replaces this fallback with its live setting.
+    return 18.0;
 }
 
 bool EffectsHandler::isCursorHidden() const

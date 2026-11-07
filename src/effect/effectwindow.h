@@ -357,6 +357,12 @@ public:
 
     void refWindow();
     void unrefWindow();
+    void refVisibleEx(int reason);
+    void unrefVisibleEx(int reason);
+    void setScissorForce(bool force);
+    bool isScissorForce() const;
+    bool isWaterMark() const;
+    bool isCurrentTab() const;
 
     bool isDeleted() const;
     bool isHidden() const;
@@ -371,14 +377,17 @@ public:
     QStringList activities() const;
 
     Q_SCRIPTABLE bool isOnDesktop(KWin::VirtualDesktop *desktop) const;
+    bool isOnDesktop(int desktop) const;
     bool isOnCurrentDesktop() const;
     bool isOnAllDesktops() const;
+    int desktop() const;
     /**
      * All the desktops by number that the window is in. On X11 this list will always have
      * a length of 1, on Wayland can be any subset.
      * If the list is empty it means the window is on all desktops
      */
     QList<KWin::VirtualDesktop *> desktops() const;
+    QVector<uint> desktopIds() const;
 
     qreal x() const;
     qreal y() const;
@@ -396,6 +405,10 @@ public:
      * @since 5.18
      */
     QRectF frameGeometry() const;
+    QRectF geometry() const
+    {
+        return frameGeometry();
+    }
     /**
      * Returns the geometry of the pixmap or buffer attached to this window.
      *

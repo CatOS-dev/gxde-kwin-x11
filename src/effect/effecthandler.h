@@ -177,9 +177,12 @@ public:
     void postPaintScreen();
     void prePaintWindow(EffectWindow *w, WindowPrePaintData &data, std::chrono::milliseconds presentTime);
     void paintWindow(const RenderTarget &renderTarget, const RenderViewport &viewport, EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data);
+    void paintWindow(EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data);
     void postPaintWindow(EffectWindow *w);
     void drawWindow(const RenderTarget &renderTarget, const RenderViewport &viewport, EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data);
+    void drawWindow(EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data);
     void renderWindow(const RenderTarget &renderTarget, const RenderViewport &viewport, EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data);
+    void renderWindow(EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data);
     std::unique_ptr<EffectFrame> effectFrameEx(const QString &url, bool staticSize = true,
                                                const QPoint &position = QPoint(-1, -1),
                                                Qt::Alignment alignment = Qt::AlignCenter) const;
@@ -315,9 +318,16 @@ public:
      * Setting this to an empty list will set the window on all desktops
      */
     Q_SCRIPTABLE void windowToDesktops(KWin::EffectWindow *w, const QList<KWin::VirtualDesktop *> &desktops);
+    void windowToDesktops(KWin::EffectWindow *w, const QVector<uint> &desktopIds);
 
     Q_SCRIPTABLE void windowToScreen(KWin::EffectWindow *w, Output *screen);
     void setShowingDesktop(bool showing);
+    QString getActiveColor() const;
+    void setKeepAbove(KWin::EffectWindow *window, bool keepAbove);
+    void sendPointer(const QPointF &pos, Qt::MouseButton button);
+    QList<KWin::EffectWindow *> getChildWinList(KWin::EffectWindow *window) const;
+    bool isTransientWin(KWin::EffectWindow *window) const;
+    bool isShortcuts(QKeyEvent *event) const;
 
     // Activities
     /**
@@ -329,14 +339,19 @@ public:
      * @returns The current desktop.
      */
     VirtualDesktop *currentDesktop() const;
+    int currentDesktopNumber() const;
     /**
      * @returns Total number of desktops currently in existence.
      */
     QList<VirtualDesktop *> desktops() const;
+    int numberOfDesktops() const;
+    VirtualDesktop *desktopForNumber(int desktop) const;
     /**
      * Set the current desktop to @a desktop.
      */
     void setCurrentDesktop(KWin::VirtualDesktop *desktop);
+    void setCurrentDesktop(int desktop);
+    void setNumberOfDesktops(int count);
     /**
      * @returns The size of desktop layout in grid units.
      */
@@ -395,6 +410,7 @@ public:
 
     Output *activeScreen() const; // Xinerama
     QRectF clientArea(clientAreaOption, const Output *screen, const VirtualDesktop *desktop) const;
+    QRectF clientArea(clientAreaOption, const Output *screen, int desktop) const;
     QRectF clientArea(clientAreaOption, const EffectWindow *c) const;
     QRectF clientArea(clientAreaOption, const QPoint &p, const VirtualDesktop *desktop) const;
 
@@ -732,6 +748,10 @@ public:
     Output *screenAt(const QPoint &point) const;
     Output *findScreen(const QString &name) const;
     Output *findScreen(int screenId) const;
+    Output *findScreen(Output *output) const;
+    Output *getCurrentPaintingScreen() const;
+    qreal getOsScale() const;
+    qreal getOsRadius() const;
 
     KWin::EffectWindow *inputPanel() const;
     bool isInputPanelOverlay() const;
@@ -1134,6 +1154,7 @@ protected:
     std::unique_ptr<WindowPropertyNotifyX11Filter> m_x11WindowPropertyNotify;
     const RenderTarget *m_currentRenderTarget = nullptr;
     const RenderViewport *m_currentRenderViewport = nullptr;
+    Output *m_currentPaintingScreen = nullptr;
 };
 
 /**

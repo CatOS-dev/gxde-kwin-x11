@@ -117,6 +117,10 @@ public:
 
     QPoint position() const;
     void setPosition(const QPoint &point);
+    void setPosition(const QPoint &point, bool)
+    {
+        setPosition(point);
+    }
 
 private:
     void reposition();
@@ -177,6 +181,10 @@ public:
     void renderPixmap(const QRegion &region = infiniteRegion(), double opacity = 1.0);
 
     void setPosition(const QPoint &point);
+    void setPosition(const QPoint &point, bool)
+    {
+        setPosition(point);
+    }
     /**
      * Set the text alignment for static frames and the position alignment
      * for non-static.

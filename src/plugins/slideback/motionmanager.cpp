@@ -84,18 +84,35 @@ void WindowMotionManager::manage(EffectWindow *w)
 
     motion.translation.setValue(w->pos());
     motion.scale.setValue(QPointF(1.0, 1.0));
+    m_orderWindowList.append(w);
 }
 
 void WindowMotionManager::unmanage(EffectWindow *w)
 {
     m_movingWindowsSet.remove(w);
     m_managedWindows.remove(w);
+    m_orderWindowList.removeOne(w);
 }
 
 void WindowMotionManager::unmanageAll()
 {
     m_managedWindows.clear();
     m_movingWindowsSet.clear();
+    m_orderWindowList.clear();
+}
+
+void WindowMotionManager::calculate(int time, bool motionEffectEnable)
+{
+    if (motionEffectEnable) {
+        calculate(time);
+        return;
+    }
+
+    m_movingWindowsSet.clear();
+    for (WindowMotion &motion : m_managedWindows) {
+        motion.translation.finish();
+        motion.scale.finish();
+    }
 }
 
 void WindowMotionManager::calculate(int time)
@@ -279,6 +296,50 @@ EffectWindow *WindowMotionManager::windowAtPoint(QPoint point, bool useStackingO
     }
 
     return nullptr;
+}
+
+void WindowMotionManager::setWindowFill(EffectWindow *w, bool fill, const QRect &rect)
+{
+    const auto it = m_managedWindows.find(w);
+    if (it == m_managedWindows.end()) {
+        return;
+    }
+    it->fill = fill;
+    it->fillRect = rect;
+}
+
+bool WindowMotionManager::isWindowFill(EffectWindow *w) const
+{
+    const auto it = m_managedWindows.constFind(w);
+    return it != m_managedWindows.cend() && it->fill;
+}
+
+QRect WindowMotionManager::getWindowFillRect(EffectWindow *w) const
+{
+    const auto it = m_managedWindows.constFind(w);
+    return it == m_managedWindows.cend() ? QRect() : it->fillRect;
+}
+
+void WindowMotionManager::resetWindowFill(EffectWindow *w)
+{
+    const auto it = m_managedWindows.find(w);
+    if (it != m_managedWindows.end()) {
+        it->fill = false;
+    }
+}
+
+void WindowMotionManager::setWindowRadius(EffectWindow *w, qreal radius)
+{
+    const auto it = m_managedWindows.find(w);
+    if (it != m_managedWindows.end()) {
+        it->radius = radius;
+    }
+}
+
+qreal WindowMotionManager::getWindowRadius(EffectWindow *w) const
+{
+    const auto it = m_managedWindows.constFind(w);
+    return it == m_managedWindows.cend() ? 0 : it->radius;
 }
 
 } // namespace KWin
