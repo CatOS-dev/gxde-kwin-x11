@@ -70,6 +70,7 @@ enum class Predicate;
 class Outline;
 class RuleBook;
 class ScreenEdges;
+class SplitManage;
 #if KWIN_BUILD_ACTIVITIES
 class Activities;
 #endif
@@ -263,6 +264,10 @@ public:
      * @returns the TileManager associated to a given output
      */
     TileManager *tileManager(Output *output);
+    SplitManage *splitManage() const;
+    void showSplitMenu(const QRect &buttonRect, uint32_t windowId);
+    void hideSplitMenu(bool delayed);
+    void setSplitMenuKeepShowing(bool keep);
 
 public:
     QPoint cascadeOffset(const QRectF &area) const;
@@ -755,6 +760,7 @@ private:
     std::unique_ptr<Activities> m_activities;
 #endif
     std::unique_ptr<PlacementTracker> m_placementTracker;
+    std::unique_ptr<SplitManage> m_splitManage;
 
     PlaceholderOutput *m_placeholderOutput = nullptr;
     std::unique_ptr<PlaceholderInputEventFilter> m_placeholderFilter;

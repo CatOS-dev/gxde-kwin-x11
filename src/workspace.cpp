@@ -35,6 +35,8 @@
 #include "rules.h"
 #include "screenedge.h"
 #include "scripting/scripting.h"
+#include "splitscreen/splitmanage.h"
+#include "splitscreen/splitmenu.h"
 #include "syncalarmx11filter.h"
 #include "tiles/tilemanager.h"
 #include "window.h"
@@ -165,6 +167,7 @@ Workspace::Workspace()
 
     new DBusInterface(this);
     m_outline = std::make_unique<Outline>();
+    m_splitManage = std::make_unique<SplitManage>(this);
 
     initShortcuts();
 
@@ -3081,6 +3084,26 @@ TileManager *Workspace::tileManager(Output *output)
     } else {
         return nullptr;
     }
+}
+
+SplitManage *Workspace::splitManage() const
+{
+    return m_splitManage.get();
+}
+
+void Workspace::showSplitMenu(const QRect &buttonRect, uint32_t windowId)
+{
+    SplitMenu::instance()->showForWindow(buttonRect, windowId);
+}
+
+void Workspace::hideSplitMenu(bool delayed)
+{
+    SplitMenu::instance()->hideMenu(delayed);
+}
+
+void Workspace::setSplitMenuKeepShowing(bool keep)
+{
+    SplitMenu::instance()->setKeepShowing(keep);
 }
 
 #if KWIN_BUILD_TABBOX

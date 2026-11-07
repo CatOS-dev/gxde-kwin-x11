@@ -204,6 +204,10 @@ target_sources(kwin PRIVATE
     scripting/workspace_wrapper.cpp
     shadow.cpp
     sm.cpp
+    splitscreen/splitbar.cpp
+    splitscreen/splitmanage.cpp
+    splitscreen/splitmenu.cpp
+    splitscreen/splitmenu.qrc
     tablet_input.cpp
     tabletmodemanager.cpp
     tiles/customtile.cpp

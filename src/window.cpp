@@ -28,6 +28,7 @@
 #include "scene/workspacescene.h"
 #include "screenedge.h"
 #include "shadow.h"
+#include "splitscreen/splitmanage.h"
 #if KWIN_BUILD_TABBOX
 #include "tabbox/tabbox.h"
 #endif
@@ -1198,14 +1199,7 @@ bool Window::startInteractiveMoveResize()
 
     m_splitMoveActive = isInteractiveMove() && isSplitWindow();
     if (m_splitMoveActive) {
-        bool hasOtherSplitWindow = false;
-        for (Window *other : workspace()->windows()) {
-            if (other != this && other->output() == output() && other->isOnCurrentDesktop() && other->isSplitWindow()) {
-                hasOtherSplitWindow = true;
-                break;
-            }
-        }
-        m_splitMoveActive = hasOtherSplitWindow;
+        m_splitMoveActive = workspace()->splitManage()->splitWindowCount(this) > 1;
         m_splitMoveArea = workspace()->clientArea(MaximizeArea, this);
         m_splitMoveStartPosition = m_interactiveMoveResize.anchor;
         m_splitMoveMode = quickTileMode();
