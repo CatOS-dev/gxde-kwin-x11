@@ -226,6 +226,10 @@ target_sources(kwin PRIVATE
     waylandshellintegration.cpp
     waylandwindow.cpp
     window.cpp
+    windowstyle/decorationstyle.cpp
+    windowstyle/windowradius.cpp
+    windowstyle/windowshadow.cpp
+    windowstyle/windowstylemanager.cpp
     workspace.cpp
     xdgactivationv1.cpp
     xdgshellintegration.cpp

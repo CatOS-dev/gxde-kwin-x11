@@ -15,6 +15,7 @@
 #include "wayland/surface.h"
 #include "wayland_server.h"
 #include "window.h"
+#include "windowstyle/windowshadow.h"
 #if KWIN_BUILD_X11
 #include "atoms.h"
 #include "x11window.h"
@@ -55,6 +56,21 @@ std::unique_ptr<Shadow> Shadow::createShadow(Window *window)
 #endif
     if (!shadow) {
         shadow = createShadowFromInternalWindow(window);
+    }
+    if (!shadow) {
+        shadow = createShadowFromWindowStyle(window);
+    }
+    return shadow;
+}
+
+std::unique_ptr<Shadow> Shadow::createShadowFromWindowStyle(Window *window)
+{
+    if (!window->windowShadowObj() || !window->windowShadowObj()->isValid()) {
+        return nullptr;
+    }
+    auto shadow = std::make_unique<Shadow>(window);
+    if (!shadow->init(window->windowShadowObj())) {
+        return nullptr;
     }
     return shadow;
 }
@@ -273,20 +289,32 @@ bool Shadow::init(const QWindow *window)
     return true;
 }
 
+bool Shadow::init(const WindowShadow *shadow)
+{
+    if (!shadow || !shadow->isValid()) {
+        return false;
+    }
+    for (int i = 0; i < ShadowElementsCount; ++i) {
+        m_shadowElements[i] = shadow->element(i);
+    }
+    m_offset = shadow->padding();
+    Q_EMIT offsetChanged();
+    Q_EMIT textureChanged();
+    return true;
+}
+
 bool Shadow::updateShadow()
 {
     if (!m_window) {
         return false;
     }
 
-    if (m_decorationShadow) {
-        if (m_window) {
-            if (m_window->decoration()) {
-                if (init(m_window->decoration())) {
-                    return true;
-                }
-            }
+    if (m_window->decoration()) {
+        if (init(m_window->decoration())) {
+            return true;
         }
+    }
+    if (m_decorationShadow) {
         return false;
     }
 
@@ -315,6 +343,10 @@ bool Shadow::updateShadow()
         }
     }
 #endif
+
+    if (m_window->windowShadowObj() && init(m_window->windowShadowObj())) {
+        return true;
+    }
 
     return false;
 }

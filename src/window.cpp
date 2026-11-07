@@ -39,7 +39,13 @@
 #include "wayland/plasmawindowmanagement.h"
 #include "wayland/surface.h"
 #include "wayland_server.h"
+#include "windowstyle/decorationstyle.h"
+#include "windowstyle/windowradius.h"
+#include "windowstyle/windowshadow.h"
 #include "workspace.h"
+#if KWIN_BUILD_X11
+#include "x11window.h"
+#endif
 
 #include <KDecoration3/DecoratedWindow>
 #include <KDecoration3/Decoration>
@@ -427,6 +433,79 @@ void Window::setBorderRadius(const BorderRadius &radius)
         m_borderRadius = radius;
         Q_EMIT borderRadiusChanged();
     }
+}
+
+DecorationStyle *Window::windowStyleObj() const
+{
+    return m_windowStyle.get();
+}
+
+WindowRadius *Window::windowRadiusObj() const
+{
+    return m_windowRadiusObj.get();
+}
+
+WindowShadow *Window::windowShadowObj() const
+{
+    return m_windowShadowObj.get();
+}
+
+void Window::createWinStyle()
+{
+    if (!m_windowStyle) {
+        m_windowStyle = std::make_unique<DecorationStyle>(this);
+        connect(m_windowStyle.get(), &DecorationStyle::mouseInputAreaMarginsChanged, this, &Window::updateWinProperty);
+    }
+    if (!m_windowRadiusObj) {
+        m_windowRadiusObj = std::make_unique<WindowRadius>(this);
+    }
+}
+
+void Window::updateWinProperty()
+{
+    m_mouseInputAreaMarginsAvailable = !m_windowStyle->propertyIsValid(DecorationStyle::MouseInputAreaMarginsProperty)
+        || !m_windowStyle->mouseInputAreaMargins().isNull();
+}
+
+void Window::updateWindowRadius(bool forceUpdate)
+{
+    createWinStyle();
+    if (m_windowRadiusObj->updateWindowRadius() || forceUpdate) {
+        updateWindowShadow(forceUpdate);
+    }
+}
+
+void Window::updateWindowShadow(bool forceUpdate)
+{
+    createWinStyle();
+    if (!m_windowShadowObj) {
+        m_windowShadowObj = std::make_unique<WindowShadow>(this);
+        forceUpdate = true;
+    }
+    if (m_windowShadowObj->updateWindowShadow() || forceUpdate) {
+        updateShadow();
+    }
+}
+
+bool Window::borderRedrawable() const
+{
+    if (isUnmanaged()) {
+        return false;
+    }
+    if (isDecorated()) {
+        return true;
+    }
+#if KWIN_BUILD_X11
+    if (const auto x11Window = qobject_cast<const X11Window *>(this)) {
+        return !x11Window->hasAlpha() && frameGeometry() == clientGeometry();
+    }
+#endif
+    return false;
+}
+
+bool Window::mouseInputAreaMarginsAvailable() const
+{
+    return m_mouseInputAreaMarginsAvailable;
 }
 
 void Window::updateMouseGrab()

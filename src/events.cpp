@@ -29,6 +29,7 @@
 #include "wayland/surface.h"
 #include "wayland/xwaylandshell_v1.h"
 #include "wayland_server.h"
+#include "windowstyle/windowstylemanager.h"
 #include "workspace.h"
 #include "x11window.h"
 
@@ -785,6 +786,11 @@ void X11Window::propertyNotifyEvent(xcb_property_notify_event_t *e)
             getWmClientLeader();
         } else if (e->atom == atoms->kde_net_wm_shadow) {
             updateShadow();
+        } else if (e->atom == atoms->deepin_net_effect
+                   || e->atom == atoms->deepin_net_radius
+                   || e->atom == atoms->deepin_net_shadow
+                   || e->atom == atoms->deepin_scissor_window) {
+            workspace()->windowStyleManager()->refreshWindow(this);
         } else if (e->atom == atoms->kde_skip_close_animation) {
             getSkipCloseAnimation();
         }

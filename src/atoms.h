@@ -82,6 +82,11 @@ public:
     Xcb::Atom primary;
     Xcb::Atom edid;
     Xcb::Atom xwayland_allow_commits;
+    Xcb::Atom deepin_scissor_window;
+    Xcb::Atom deepin_net_effect;
+    Xcb::Atom deepin_net_startup;
+    Xcb::Atom deepin_net_radius;
+    Xcb::Atom deepin_net_shadow;
 
     /**
      * @internal

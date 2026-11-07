@@ -71,6 +71,7 @@ class Outline;
 class RuleBook;
 class ScreenEdges;
 class SplitManage;
+class WindowStyleManager;
 #if KWIN_BUILD_ACTIVITIES
 class Activities;
 #endif
@@ -265,6 +266,12 @@ public:
      */
     TileManager *tileManager(Output *output);
     SplitManage *splitManage() const;
+    WindowStyleManager *windowStyleManager() const;
+    WindowStyleManager *getWindowStyleMgr() const;
+    qreal getWindowRadius() const;
+    qreal getOsScreenScale() const;
+    bool isDarkTheme() const;
+    void setDarkTheme(bool dark);
     void showSplitMenu(const QRect &buttonRect, uint32_t windowId);
     void hideSplitMenu(bool delayed);
     void setSplitMenuKeepShowing(bool keep);
@@ -571,6 +578,8 @@ Q_SIGNALS:
      */
     void workspaceInitialized();
     void geometryChanged();
+    void osRadiusChanged();
+    void osThemeChanged();
 
     // Signals required for the scripting interface
     void currentActivityChanged();
@@ -760,6 +769,7 @@ private:
     std::unique_ptr<Activities> m_activities;
 #endif
     std::unique_ptr<PlacementTracker> m_placementTracker;
+    std::unique_ptr<WindowStyleManager> m_windowStyleManager;
     std::unique_ptr<SplitManage> m_splitManage;
 
     PlaceholderOutput *m_placeholderOutput = nullptr;

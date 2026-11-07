@@ -46,11 +46,14 @@ class Group;
 class Output;
 class ClientMachine;
 class EffectWindow;
+class DecorationStyle;
 class Tile;
 class Shadow;
 class SurfaceItem;
 class VirtualDesktop;
 class WindowItem;
+class WindowRadius;
+class WindowShadow;
 
 namespace Decoration
 {
@@ -612,6 +615,15 @@ public:
 
     BorderRadius borderRadius() const;
     void setBorderRadius(const BorderRadius &radius);
+    DecorationStyle *windowStyleObj() const;
+    WindowRadius *windowRadiusObj() const;
+    WindowShadow *windowShadowObj() const;
+    void createWinStyle();
+    void updateWinProperty();
+    void updateWindowRadius(bool forceUpdate = false);
+    void updateWindowShadow(bool forceUpdate = false);
+    bool borderRedrawable() const;
+    bool mouseInputAreaMarginsAvailable() const;
 
     virtual QSizeF minSize() const;
     virtual QSizeF maxSize() const;
@@ -1795,6 +1807,10 @@ protected:
     bool m_hiddenByShowDesktop = false;
 
     BorderRadius m_borderRadius;
+    std::unique_ptr<DecorationStyle> m_windowStyle;
+    std::unique_ptr<WindowRadius> m_windowRadiusObj;
+    std::unique_ptr<WindowShadow> m_windowShadowObj;
+    bool m_mouseInputAreaMarginsAvailable = true;
 
     qreal m_nextTargetScale = 1;
     qreal m_targetScale = 1;

@@ -40,6 +40,7 @@
 #include "syncalarmx11filter.h"
 #include "tiles/tilemanager.h"
 #include "window.h"
+#include "windowstyle/windowstylemanager.h"
 #if KWIN_BUILD_TABBOX
 #include "tabbox/tabbox.h"
 #endif
@@ -167,6 +168,9 @@ Workspace::Workspace()
 
     new DBusInterface(this);
     m_outline = std::make_unique<Outline>();
+    m_windowStyleManager = std::make_unique<WindowStyleManager>(this);
+    connect(m_windowStyleManager.get(), &WindowStyleManager::radiusChanged, this, &Workspace::osRadiusChanged);
+    connect(m_windowStyleManager.get(), &WindowStyleManager::themeChanged, this, &Workspace::osThemeChanged);
     m_splitManage = std::make_unique<SplitManage>(this);
 
     initShortcuts();
@@ -3089,6 +3093,36 @@ TileManager *Workspace::tileManager(Output *output)
 SplitManage *Workspace::splitManage() const
 {
     return m_splitManage.get();
+}
+
+WindowStyleManager *Workspace::windowStyleManager() const
+{
+    return m_windowStyleManager.get();
+}
+
+WindowStyleManager *Workspace::getWindowStyleMgr() const
+{
+    return windowStyleManager();
+}
+
+qreal Workspace::getWindowRadius() const
+{
+    return m_windowStyleManager->osRadius();
+}
+
+qreal Workspace::getOsScreenScale() const
+{
+    return m_windowStyleManager->osScale();
+}
+
+bool Workspace::isDarkTheme() const
+{
+    return m_windowStyleManager->isDarkTheme();
+}
+
+void Workspace::setDarkTheme(bool dark)
+{
+    m_windowStyleManager->setDarkTheme(dark);
 }
 
 void Workspace::showSplitMenu(const QRect &buttonRect, uint32_t windowId)

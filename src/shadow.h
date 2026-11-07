@@ -28,6 +28,7 @@ namespace KWin
 
 class ShadowInterface;
 class Window;
+class WindowShadow;
 
 /**
  * @short Class representing a Window's Shadow to be rendered by the Compositor.
@@ -126,11 +127,13 @@ private:
     static std::unique_ptr<Shadow> createShadowFromDecoration(Window *window);
     static std::unique_ptr<Shadow> createShadowFromWayland(Window *window);
     static std::unique_ptr<Shadow> createShadowFromInternalWindow(Window *window);
+    static std::unique_ptr<Shadow> createShadowFromWindowStyle(Window *window);
     static QList<uint32_t> readX11ShadowProperty(xcb_window_t id);
     bool init(const QList<uint32_t> &data);
     bool init(KDecoration3::Decoration *decoration);
     bool init(const QPointer<ShadowInterface> &shadow);
     bool init(const QWindow *window);
+    bool init(const WindowShadow *shadow);
     Window *m_window;
     // shadow elements
     QImage m_shadowElements[ShadowElementsCount];

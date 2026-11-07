@@ -4376,6 +4376,9 @@ bool X11Window::isResizable() const
     if ((gravity == Gravity::Top || gravity == Gravity::TopLeft || gravity == Gravity::TopRight || gravity == Gravity::Left || gravity == Gravity::BottomLeft) && rules()->checkPosition(invalidPoint) != invalidPoint) {
         return false;
     }
+    if (!mouseInputAreaMarginsAvailable()) {
+        return false;
+    }
 
     QSizeF min = minSize();
     QSizeF max = maxSize();
