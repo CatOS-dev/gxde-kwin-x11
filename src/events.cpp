@@ -788,6 +788,7 @@ void X11Window::propertyNotifyEvent(xcb_property_notify_event_t *e)
             updateShadow();
         } else if (e->atom == atoms->deepin_no_titlebar
                    || e->atom == atoms->deepin_net_effect
+                   || e->atom == atoms->deepin_net_startup
                    || e->atom == atoms->deepin_net_radius
                    || e->atom == atoms->deepin_net_shadow
                    || e->atom == atoms->deepin_scissor_window) {

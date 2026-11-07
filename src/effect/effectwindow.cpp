@@ -236,6 +236,11 @@ bool EffectWindow::isCurrentTab() const
     return true;
 }
 
+int EffectWindow::startEffectType() const
+{
+    return d->m_window->startUpEffectType();
+}
+
 bool EffectWindow::hasDecoration() const
 {
     return d->m_window->decoration();

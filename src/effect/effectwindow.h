@@ -333,6 +333,13 @@ class KWIN_EXPORT EffectWindow : public QObject
      */
     Q_PROPERTY(bool hiddenByShowDesktop READ isHiddenByShowDesktop)
 
+    /**
+     * Selects the Deepin-compatible opening animation for this window.
+     * 0 disables it, 1 selects the regular scale animation, and other values
+     * are reserved for shell-specific popup and launcher animations.
+     */
+    Q_PROPERTY(int startEffectType READ startEffectType)
+
 public:
     /**  Flags explaining why painting should be disabled  */
     enum {
@@ -363,6 +370,7 @@ public:
     bool isScissorForce() const;
     bool isWaterMark() const;
     bool isCurrentTab() const;
+    int startEffectType() const;
 
     bool isDeleted() const;
     bool isHidden() const;

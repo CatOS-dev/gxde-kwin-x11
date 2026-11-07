@@ -435,6 +435,16 @@ void Window::setBorderRadius(const BorderRadius &radius)
     }
 }
 
+int Window::startUpEffectType() const
+{
+    return m_startUpEffectType;
+}
+
+void Window::setStartUpEffectType(int type)
+{
+    m_startUpEffectType = type;
+}
+
 DecorationStyle *Window::windowStyleObj() const
 {
     return m_windowStyle.get();

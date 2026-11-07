@@ -97,6 +97,9 @@ class ScaleEffect {
         if (!ScaleEffect.isScaleWindow(window)) {
             return;
         }
+        if (window.startEffectType != 1 && window.startEffectType != 16) {
+            return;
+        }
         if (!window.visible) {
             return;
         }
@@ -126,6 +129,9 @@ class ScaleEffect {
             return;
         }
         if (!ScaleEffect.isScaleWindow(window)) {
+            return;
+        }
+        if (window.startEffectType != 1 && window.startEffectType != 16) {
             return;
         }
         if (!window.visible || window.skipsCloseAnimation) {

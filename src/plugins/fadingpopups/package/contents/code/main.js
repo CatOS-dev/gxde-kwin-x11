@@ -81,6 +81,11 @@ var fadingPopupsEffect = {
         if (!isPopupWindow(window)) {
             return;
         }
+        if (window.startEffectType == 0
+                || window.startEffectType == 1
+                || window.startEffectType == 16) {
+            return;
+        }
         if (!window.visible) {
             return;
         }

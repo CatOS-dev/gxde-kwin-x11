@@ -615,6 +615,8 @@ public:
 
     BorderRadius borderRadius() const;
     void setBorderRadius(const BorderRadius &radius);
+    int startUpEffectType() const;
+    void setStartUpEffectType(int type);
     DecorationStyle *windowStyleObj() const;
     WindowRadius *windowRadiusObj() const;
     WindowShadow *windowShadowObj() const;
@@ -1807,6 +1809,7 @@ protected:
     bool m_hiddenByShowDesktop = false;
 
     BorderRadius m_borderRadius;
+    int m_startUpEffectType = 1;
     std::unique_ptr<DecorationStyle> m_windowStyle;
     std::unique_ptr<WindowRadius> m_windowRadiusObj;
     std::unique_ptr<WindowShadow> m_windowShadowObj;

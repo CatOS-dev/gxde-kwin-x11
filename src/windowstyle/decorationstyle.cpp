@@ -233,6 +233,19 @@ void DecorationStyle::syncX11Properties()
     m_cancelRadius = scenes.testFlag(EffectNoRadius);
     m_cancelShadow = scenes.testFlag(EffectNoShadow);
 
+    int startUpEffectType = 1;
+    if (scenes.testFlag(EffectNoStart)) {
+        startUpEffectType = 0;
+    } else if (propertyIsValid(WindowStartUpEffectProperty)) {
+        startUpEffectType = qRound(windowStartUpEffect());
+    } else {
+        Xcb::Property startUpEffect(false, windowId, atoms->deepin_net_startup, XCB_ATOM_CARDINAL, 0, 1);
+        if (const auto value = startUpEffect.value<const quint32 *>()) {
+            startUpEffectType = static_cast<int>(*value);
+        }
+    }
+    m_window->setStartUpEffectType(startUpEffectType);
+
     if (!m_cancelRadius && (!propertyIsValid(WindowRadiusProperty) || m_x11RadiusProperty)) {
         Xcb::StringProperty radius(windowId, atoms->deepin_net_radius);
         const QByteArray data = radius.toByteArray();
