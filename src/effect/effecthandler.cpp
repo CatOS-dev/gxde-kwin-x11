@@ -20,6 +20,7 @@
 #include "core/rendertarget.h"
 #include "core/renderviewport.h"
 #include "decorations/decorationbridge.h"
+#include "effect/effectframe.h"
 #include "effect/effectloader.h"
 #include "effect/offscreenquickview.h"
 #include "effectsadaptor.h"
@@ -129,6 +130,7 @@ EffectsHandler::EffectsHandler(Compositor *compositor, WorkspaceScene *scene)
         return;
     }
     KWin::effects = this;
+    KWin::effectsEx = this;
 
     qRegisterMetaType<QList<KWin::EffectWindow *>>();
     qRegisterMetaType<KWin::SessionState>();
@@ -250,6 +252,7 @@ EffectsHandler::~EffectsHandler()
 {
     unloadAllEffects();
     KWin::effects = nullptr;
+    KWin::effectsEx = nullptr;
 }
 
 #if KWIN_BUILD_X11
@@ -319,12 +322,29 @@ void EffectsHandler::prePaintScreen(ScreenPrePaintData &data, std::chrono::milli
 
 void EffectsHandler::paintScreen(const RenderTarget &renderTarget, const RenderViewport &viewport, int mask, const QRegion &region, Output *screen)
 {
+    m_currentRenderTarget = &renderTarget;
+    m_currentRenderViewport = &viewport;
     if (m_currentPaintScreenIterator != m_activeEffects.constEnd()) {
         (*m_currentPaintScreenIterator++)->paintScreen(renderTarget, viewport, mask, region, screen);
         --m_currentPaintScreenIterator;
     } else {
         m_scene->finalPaintScreen(renderTarget, viewport, mask, region, screen);
     }
+}
+
+std::unique_ptr<EffectFrame> EffectsHandler::effectFrameEx(const QString &url, bool staticSize, const QPoint &position, Qt::Alignment alignment) const
+{
+    return std::make_unique<EffectFrame>(url, staticSize, position, alignment);
+}
+
+const RenderTarget *EffectsHandler::currentRenderTarget() const
+{
+    return m_currentRenderTarget;
+}
+
+const RenderViewport *EffectsHandler::currentRenderViewport() const
+{
+    return m_currentRenderViewport;
 }
 
 void EffectsHandler::postPaintScreen()
@@ -402,6 +422,8 @@ bool EffectsHandler::decorationsHaveAlpha() const
 // start another painting pass
 void EffectsHandler::startPaint()
 {
+    m_currentRenderTarget = nullptr;
+    m_currentRenderViewport = nullptr;
     m_activeEffects.clear();
     m_activeEffects.reserve(loaded_effects.count());
     for (QList<KWin::EffectPair>::const_iterator it = loaded_effects.constBegin(); it != loaded_effects.constEnd(); ++it) {
@@ -1631,6 +1653,7 @@ QQmlEngine *EffectsHandler::qmlEngine() const
 }
 
 EffectsHandler *effects = nullptr;
+EffectsHandler *effectsEx = nullptr;
 
 } // namespace
 

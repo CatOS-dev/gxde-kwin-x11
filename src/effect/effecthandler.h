@@ -70,6 +70,7 @@ class OffscreenQuickView;
 class Group;
 class Output;
 class Effect;
+class EffectFrame;
 struct TabletToolProximityEvent;
 struct TabletToolAxisEvent;
 struct TabletToolTipEvent;
@@ -171,12 +172,17 @@ public:
     // for use by effects
     void prePaintScreen(ScreenPrePaintData &data, std::chrono::milliseconds presentTime);
     void paintScreen(const RenderTarget &renderTarget, const RenderViewport &viewport, int mask, const QRegion &region, Output *screen);
+    const RenderTarget *currentRenderTarget() const;
+    const RenderViewport *currentRenderViewport() const;
     void postPaintScreen();
     void prePaintWindow(EffectWindow *w, WindowPrePaintData &data, std::chrono::milliseconds presentTime);
     void paintWindow(const RenderTarget &renderTarget, const RenderViewport &viewport, EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data);
     void postPaintWindow(EffectWindow *w);
     void drawWindow(const RenderTarget &renderTarget, const RenderViewport &viewport, EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data);
     void renderWindow(const RenderTarget &renderTarget, const RenderViewport &viewport, EffectWindow *w, int mask, const QRegion &region, WindowPaintData &data);
+    std::unique_ptr<EffectFrame> effectFrameEx(const QString &url, bool staticSize = true,
+                                               const QPoint &position = QPoint(-1, -1),
+                                               Qt::Alignment alignment = Qt::AlignCenter) const;
     QVariant kwinOption(KWinOption kwopt);
     /**
      * Sets the cursor while the mouse is intercepted.
@@ -1126,12 +1132,15 @@ protected:
     QList<Effect *> m_grabbedMouseEffects;
     EffectLoader *m_effectLoader;
     std::unique_ptr<WindowPropertyNotifyX11Filter> m_x11WindowPropertyNotify;
+    const RenderTarget *m_currentRenderTarget = nullptr;
+    const RenderViewport *m_currentRenderViewport = nullptr;
 };
 
 /**
  * Pointer to the global EffectsHandler object.
  */
 extern KWIN_EXPORT EffectsHandler *effects;
+extern KWIN_EXPORT EffectsHandler *effectsEx;
 
 } // namespace
 

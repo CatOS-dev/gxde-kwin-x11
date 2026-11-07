@@ -6,8 +6,15 @@
 */
 
 #include "effect/effectframe.h"
+#include "core/output.h"
+#include "core/rendertarget.h"
+#include "core/renderviewport.h"
 #include "effect/effecthandler.h"
+#include "opengl/glshader.h"
+#include "opengl/glshadermanager.h"
+#include "opengl/gltexture.h"
 
+#include <QBuffer>
 #include <QQuickItem>
 #include <QStandardPaths>
 
@@ -39,6 +46,20 @@ EffectFrameQuickScene::EffectFrameQuickScene(EffectFrameStyle style, bool static
     // *if* someone really needs this to be configurable.
     const QString path = QStandardPaths::locate(QStandardPaths::GenericDataLocation, defaultPath);
 
+    setSource(QUrl::fromLocalFile(path), QVariantMap{{QStringLiteral("effectFrame"), QVariant::fromValue(this)}});
+
+    if (rootItem()) {
+        connect(rootItem(), &QQuickItem::implicitWidthChanged, this, &EffectFrameQuickScene::reposition);
+        connect(rootItem(), &QQuickItem::implicitHeightChanged, this, &EffectFrameQuickScene::reposition);
+    }
+}
+
+EffectFrameQuickScene::EffectFrameQuickScene(const QString &url, bool staticSize, QPoint position, Qt::Alignment alignment)
+    : m_static(staticSize)
+    , m_point(position)
+    , m_alignment(alignment)
+{
+    const QString path = QStandardPaths::locate(QStandardPaths::GenericDataLocation, url);
     setSource(QUrl::fromLocalFile(path), QVariantMap{{QStringLiteral("effectFrame"), QVariant::fromValue(this)}});
 
     if (rootItem()) {
@@ -150,6 +171,88 @@ qreal EffectFrameQuickScene::crossFadeProgress() const
     return m_crossFadeProgress;
 }
 
+qreal EffectFrameQuickScene::scale() const
+{
+    if (const Output *output = effects->activeScreen()) {
+        return output->scale();
+    }
+    return 1.0;
+}
+
+QColor EffectFrameQuickScene::color() const
+{
+    return m_color;
+}
+
+void EffectFrameQuickScene::setColor(const QColor &color)
+{
+    if (m_color != color) {
+        m_color = color;
+        Q_EMIT colorChanged();
+    }
+}
+
+int EffectFrameQuickScene::radius() const
+{
+    return m_radius;
+}
+
+void EffectFrameQuickScene::setRadius(int radius)
+{
+    if (m_radius != radius) {
+        m_radius = radius;
+        Q_EMIT radiusChanged();
+    }
+}
+
+QSize EffectFrameQuickScene::size() const
+{
+    return m_size;
+}
+
+void EffectFrameQuickScene::setSize(const QSize &size)
+{
+    if (m_size != size) {
+        m_size = size;
+        Q_EMIT sizeChanged();
+    }
+}
+
+QUrl EffectFrameQuickScene::image() const
+{
+    return m_image;
+}
+
+void EffectFrameQuickScene::setImage(const QUrl &image)
+{
+    if (m_image != image) {
+        m_image = image;
+        Q_EMIT imageChanged();
+    }
+}
+
+void EffectFrameQuickScene::setImage(const QPixmap &image)
+{
+    QByteArray data;
+    QBuffer buffer(&data);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    setImage(QUrl(QStringLiteral("data:image/png;base64,") + QString::fromLatin1(data.toBase64())));
+}
+
+QPoint EffectFrameQuickScene::clipOffset() const
+{
+    return m_clipOffset;
+}
+
+void EffectFrameQuickScene::setClipOffset(const QPoint &offset)
+{
+    if (m_clipOffset != offset) {
+        m_clipOffset = offset;
+        Q_EMIT clipOffsetChanged();
+    }
+}
+
 void EffectFrameQuickScene::setCrossFadeProgress(qreal progress)
 {
     if (m_crossFadeProgress != progress) {
@@ -235,6 +338,18 @@ EffectFrame::EffectFrame(EffectFrameStyle style, bool staticSize, QPoint positio
     });
 }
 
+EffectFrame::EffectFrame(const QString &url, bool staticSize, QPoint position, Qt::Alignment alignment)
+    : m_view(new EffectFrameQuickScene(url, staticSize, position, alignment))
+{
+    connect(m_view, &OffscreenQuickScene::repaintNeeded, this, [this] {
+        effects->addRepaint(geometry());
+    });
+    connect(m_view, &OffscreenQuickScene::geometryChanged, this, [](const QRect &oldGeometry, const QRect &newGeometry) {
+        effects->addRepaint(oldGeometry);
+        effects->addRepaint(newGeometry);
+    });
+}
+
 EffectFrame::~EffectFrame()
 {
     // Effects often destroy their cached TextFrames in pre/postPaintScreen.
@@ -277,6 +392,7 @@ QRect EffectFrame::geometry() const
 void EffectFrame::setGeometry(const QRect &geometry, bool force)
 {
     m_view->setGeometry(geometry);
+    m_view->setSize(geometry.size());
 }
 
 QIcon EffectFrame::icon() const
@@ -322,6 +438,57 @@ void EffectFrame::render(const RenderTarget &renderTarget, const RenderViewport 
     effects->renderOffscreenQuickView(renderTarget, viewport, m_view);
 }
 
+void EffectFrame::render(const QRegion &region, double opacity, double frameOpacity)
+{
+    if (const RenderTarget *renderTarget = effects->currentRenderTarget()) {
+        if (const RenderViewport *viewport = effects->currentRenderViewport()) {
+            render(*renderTarget, *viewport, region, opacity, frameOpacity);
+        }
+    }
+}
+
+void EffectFrame::renderPixmap(const RenderTarget &renderTarget, const RenderViewport &viewport, const QRegion &region, double opacity)
+{
+    if (m_pixmap.isNull()) {
+        return;
+    }
+
+    ShaderTraits traits = ShaderTrait::MapTexture;
+    if (opacity < 1.0) {
+        traits |= ShaderTrait::Modulate;
+    }
+    GLShader *shader = ShaderManager::instance()->pushShader(traits);
+    const QRectF rect = scaledRect(geometry(), viewport.scale());
+    QMatrix4x4 modelViewProjection = viewport.projectionMatrix();
+    modelViewProjection.translate(rect.x(), rect.y());
+    shader->setUniform(GLShader::Mat4Uniform::ModelViewProjectionMatrix, modelViewProjection);
+    if (opacity < 1.0) {
+        shader->setUniform(GLShader::Vec4Uniform::ModulationConstant, QVector4D(opacity, opacity, opacity, opacity));
+    }
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    if (!m_texture) {
+        m_texture = GLTexture::upload(m_pixmap);
+    }
+    if (m_texture) {
+        m_texture->bind();
+        m_texture->render(rect.size());
+        m_texture->unbind();
+    }
+    glDisable(GL_BLEND);
+    ShaderManager::instance()->popShader();
+}
+
+void EffectFrame::renderPixmap(const QRegion &region, double opacity)
+{
+    if (const RenderTarget *renderTarget = effects->currentRenderTarget()) {
+        if (const RenderViewport *viewport = effects->currentRenderViewport()) {
+            renderPixmap(*renderTarget, *viewport, region, opacity);
+        }
+    }
+}
+
 QString EffectFrame::text() const
 {
     return m_view->text();
@@ -350,6 +517,64 @@ void EffectFrame::enableCrossFade(bool enable)
 qreal EffectFrame::crossFadeProgress() const
 {
     return m_view->crossFadeProgress();
+}
+
+void EffectFrame::setColor(const QColor &color)
+{
+    m_view->setColor(color);
+}
+
+QColor EffectFrame::color() const
+{
+    return m_view->color();
+}
+
+void EffectFrame::setRadius(int radius)
+{
+    m_view->setRadius(radius);
+}
+
+int EffectFrame::radius() const
+{
+    return m_view->radius();
+}
+
+void EffectFrame::setImage(const QUrl &image)
+{
+    m_view->setImage(image);
+}
+
+void EffectFrame::setImage(const QPixmap &image)
+{
+    m_view->setImage(image);
+}
+
+QUrl EffectFrame::image() const
+{
+    return m_view->image();
+}
+
+void EffectFrame::setPixmap(const QPixmap &pixmap)
+{
+    if (pixmap.cacheKey() != m_pixmap.cacheKey()) {
+        m_pixmap = pixmap;
+        m_texture.reset();
+    }
+}
+
+QPixmap EffectFrame::pixmap() const
+{
+    return m_pixmap;
+}
+
+QPoint EffectFrame::clipOffset() const
+{
+    return m_view->clipOffset();
+}
+
+void EffectFrame::setClipOffset(const QPoint &offset)
+{
+    m_view->setClipOffset(offset);
 }
 
 void EffectFrame::setCrossFadeProgress(qreal progress)

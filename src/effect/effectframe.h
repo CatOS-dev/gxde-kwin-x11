@@ -12,12 +12,17 @@
 
 #include <QFont>
 #include <QIcon>
+#include <QPixmap>
+#include <QUrl>
+
+#include <memory>
 
 namespace KWin
 {
 
 class RenderTarget;
 class RenderViewport;
+class GLTexture;
 
 /**
  * Style types used by @ref EffectFrame.
@@ -40,9 +45,16 @@ class EffectFrameQuickScene : public OffscreenQuickScene
     Q_PROPERTY(qreal frameOpacity READ frameOpacity NOTIFY frameOpacityChanged)
     Q_PROPERTY(bool crossFadeEnabled READ crossFadeEnabled NOTIFY crossFadeEnabledChanged)
     Q_PROPERTY(qreal crossFadeProgress READ crossFadeProgress NOTIFY crossFadeProgressChanged)
+    Q_PROPERTY(qreal scale READ scale NOTIFY scaleChanged)
+    Q_PROPERTY(QColor color READ color NOTIFY colorChanged)
+    Q_PROPERTY(int radius READ radius NOTIFY radiusChanged)
+    Q_PROPERTY(QSize size READ size NOTIFY sizeChanged)
+    Q_PROPERTY(QUrl image READ image NOTIFY imageChanged)
+    Q_PROPERTY(QPoint clipOffset READ clipOffset NOTIFY clipOffsetChanged)
 
 public:
     EffectFrameQuickScene(EffectFrameStyle style, bool staticSize, QPoint position, Qt::Alignment alignment);
+    EffectFrameQuickScene(const QString &url, bool staticSize, QPoint position, Qt::Alignment alignment);
     ~EffectFrameQuickScene() override;
 
     EffectFrameStyle style() const;
@@ -76,6 +88,30 @@ public:
     void setCrossFadeProgress(qreal progress);
     Q_SIGNAL void crossFadeProgressChanged(qreal progress);
 
+    qreal scale() const;
+    Q_SIGNAL void scaleChanged();
+
+    QColor color() const;
+    void setColor(const QColor &color);
+    Q_SIGNAL void colorChanged();
+
+    int radius() const;
+    void setRadius(int radius);
+    Q_SIGNAL void radiusChanged();
+
+    QSize size() const;
+    void setSize(const QSize &size);
+    Q_SIGNAL void sizeChanged();
+
+    QUrl image() const;
+    void setImage(const QUrl &image);
+    void setImage(const QPixmap &image);
+    Q_SIGNAL void imageChanged();
+
+    QPoint clipOffset() const;
+    void setClipOffset(const QPoint &offset);
+    Q_SIGNAL void clipOffsetChanged();
+
     Qt::Alignment alignment() const;
     void setAlignment(Qt::Alignment alignment);
 
@@ -100,6 +136,11 @@ private:
     qreal m_frameOpacity = 0.0;
     bool m_crossFadeEnabled = false;
     qreal m_crossFadeProgress = 0.0;
+    QColor m_color;
+    int m_radius = 0;
+    QSize m_size;
+    QUrl m_image;
+    QPoint m_clipOffset;
 };
 
 /**
@@ -117,6 +158,8 @@ class KWIN_EXPORT EffectFrame : public QObject
 public:
     explicit EffectFrame(EffectFrameStyle style, bool staticSize = true, QPoint position = QPoint(-1, -1),
                          Qt::Alignment alignment = Qt::AlignCenter);
+    explicit EffectFrame(const QString &url, bool staticSize = true, QPoint position = QPoint(-1, -1),
+                         Qt::Alignment alignment = Qt::AlignCenter);
     ~EffectFrame();
 
     /**
@@ -129,6 +172,9 @@ public:
      * Render the frame.
      */
     void render(const RenderTarget &renderTarget, const RenderViewport &viewport, const QRegion &region = infiniteRegion(), double opacity = 1.0, double frameOpacity = 1.0);
+    void render(const QRegion &region = infiniteRegion(), double opacity = 1.0, double frameOpacity = 1.0);
+    void renderPixmap(const RenderTarget &renderTarget, const RenderViewport &viewport, const QRegion &region = infiniteRegion(), double opacity = 1.0);
+    void renderPixmap(const QRegion &region = infiniteRegion(), double opacity = 1.0);
 
     void setPosition(const QPoint &point);
     /**
@@ -195,8 +241,22 @@ public:
      */
     qreal crossFadeProgress() const;
 
+    void setColor(const QColor &color);
+    QColor color() const;
+    void setRadius(int radius);
+    int radius() const;
+    void setImage(const QUrl &image);
+    void setImage(const QPixmap &image);
+    QUrl image() const;
+    void setPixmap(const QPixmap &pixmap);
+    QPixmap pixmap() const;
+    QPoint clipOffset() const;
+    void setClipOffset(const QPoint &offset);
+
 private:
     EffectFrameQuickScene *m_view;
+    QPixmap m_pixmap;
+    std::unique_ptr<GLTexture> m_texture;
 };
 
 } // namespace KWin
