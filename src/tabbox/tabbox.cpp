@@ -499,7 +499,7 @@ void TabBox::show()
         m_isShown = false;
         return;
     }
-    workspace()->setShowingDesktop(false);
+    workspace()->setShowingDesktop(false, false);
     workspace()->setPreviewClientList({});
     reference();
     m_isShown = true;
@@ -1181,7 +1181,7 @@ void TabBox::accept(bool closeTabBox)
         Workspace::self()->activateWindow(c);
         shadeActivate(c);
         if (c->isDesktop()) {
-            Workspace::self()->setShowingDesktop(!Workspace::self()->showingDesktop(), !m_defaultConfig.isHighlightWindows());
+            Workspace::self()->setShowingDesktop(true, false);
         }
     }
 }
