@@ -497,6 +497,7 @@ void TabBox::show()
     reference();
     m_isShown = true;
     m_tabBox->show();
+    m_lastKeyPress.start();
 }
 
 void TabBox::hide(bool abort)
@@ -1069,6 +1070,22 @@ void TabBox::keyPress(const KeyboardKeyEvent &keyEvent)
 {
     if (!m_tabGrab) {
         return;
+    }
+
+    switch (keyEvent.key) {
+    case Qt::Key_Tab:
+    case Qt::Key_Backtab:
+    case Qt::Key_Left:
+    case Qt::Key_Right:
+    case Qt::Key_AsciiTilde:
+    case Qt::Key_QuoteLeft:
+        if (m_lastKeyPress.isValid() && m_lastKeyPress.elapsed() < 200) {
+            return;
+        }
+        m_lastKeyPress.restart();
+        break;
+    default:
+        break;
     }
 
     Direction direction(Steady);

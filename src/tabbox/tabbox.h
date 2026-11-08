@@ -14,6 +14,7 @@
 #include "input_event.h"
 #include "tabbox/tabboxhandler.h"
 #include "utils/common.h"
+#include <QElapsedTimer>
 #include <QKeySequence>
 #include <QModelIndex>
 #include <QTimer>
@@ -292,6 +293,7 @@ private:
     QList<ElectricBorder> m_borderActivate, m_borderAlternativeActivate;
     QHash<ElectricBorder, QAction *> m_touchActivate;
     QHash<ElectricBorder, QAction *> m_touchAlternativeActivate;
+    QElapsedTimer m_lastKeyPress;
 
 #if KWIN_BUILD_X11
     std::unique_ptr<X11EventFilter> m_x11EventFilter;
