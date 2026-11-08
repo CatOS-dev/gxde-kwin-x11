@@ -73,7 +73,8 @@ QVariant ClientModel::data(const QModelIndex &index, int role) const
         return client->isCloseable() && !client->isFirstInTabBox();
     case IconRole:
         if (client->isDesktop()) {
-            return QIcon::fromTheme(QStringLiteral("user-desktop"));
+            QIcon icon = QIcon::fromTheme(QStringLiteral("deepin-toggle-desktop"));
+            return icon.isNull() ? QIcon::fromTheme(QStringLiteral("user-desktop")) : icon;
         }
         return client->icon();
     default:
