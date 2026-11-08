@@ -115,6 +115,7 @@ Depends:
  hwdata,
  kglobalacceld,
  libgxde-kwin-x11-6 (= ${binary:Version}),
+ milou,
  plasma-desktoptheme,
  qml6-module-org-kde-kirigami,
  qml6-module-org-kde-kquickcontrolsaddons,

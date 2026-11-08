@@ -1,3 +1,11 @@
+gxde-kwin-x11 (4:6.7.6-7) unstable; urgency=medium
+
+  * Install Milou for Overview's QML search view.
+  * Honor shaped X11 windows when raising after mouse release.
+  * Complete interactive moves when another window becomes active.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 19:31:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-6) unstable; urgency=medium
 
   * Raise Deepin File Manager on XInput button release when available.
