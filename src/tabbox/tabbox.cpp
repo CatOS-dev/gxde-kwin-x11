@@ -235,6 +235,13 @@ void TabBoxHandlerImpl::restack(Window *c, Window *under)
 void TabBoxHandlerImpl::elevateClient(Window *c, QWindow *tabbox, bool b) const
 {
     c->elevate(b);
+    if (c->isDesktop()) {
+        for (Window *window : Workspace::self()->windows()) {
+            if (window->isDock() && window->isOnCurrentDesktop()) {
+                window->elevate(b);
+            }
+        }
+    }
     if (Window *w = Workspace::self()->findInternal(tabbox)) {
         w->elevate(b);
     }
