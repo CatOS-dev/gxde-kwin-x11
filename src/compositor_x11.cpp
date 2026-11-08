@@ -300,6 +300,9 @@ void X11Compositor::start()
     xcb_composite_redirect_subwindows(kwinApp()->x11Connection(),
                                       kwinApp()->x11RootWindow(),
                                       XCB_COMPOSITE_REDIRECT_MANUAL);
+    // Deepin clients watch this root property while the compositor changes.
+    // Publish the start transition before building the scene, as in Deepin KWin.
+    announceDeepinCompositingState(1);
 
     // Decide what compositing types can be used.
     QList<CompositingType> candidateCompositors = kwinApp()->outputBackend()->supportedCompositors();
@@ -340,6 +343,7 @@ void X11Compositor::start()
 
     if (!m_backend) {
         m_state = State::Off;
+        announceDeepinCompositingState(0);
 
         xcb_composite_unredirect_subwindows(kwinApp()->x11Connection(),
                                             kwinApp()->x11RootWindow(),
@@ -378,7 +382,6 @@ void X11Compositor::start()
         m_releaseSelectionTimer.stop();
     }
 
-    announceDeepinCompositingState(1);
     Q_EMIT compositingToggled(true);
 }
 
