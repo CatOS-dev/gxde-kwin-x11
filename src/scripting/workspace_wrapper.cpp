@@ -310,6 +310,13 @@ Window *WorkspaceWrapper::getClient(qulonglong windowId)
 }
 #endif
 
+void WorkspaceWrapper::updateWindowGeometry(Window *client, const QRectF &geometry)
+{
+    if (client && geometry.isValid()) {
+        client->moveResize(geometry);
+    }
+}
+
 QList<KWin::Window *> WorkspaceWrapper::windowAt(const QPointF &pos, int count) const
 {
     QList<KWin::Window *> result;

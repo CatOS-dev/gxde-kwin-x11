@@ -1,3 +1,9 @@
+gxde-kwin-x11 (4:6.7.6-4) unstable; urgency=medium
+
+  * Restore the Deepin scripting API for setting a window's frame geometry.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 18:50:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-3) unstable; urgency=medium
 
   * Port the Deepin Snap Helper effect to the KWin 6 rendering and window

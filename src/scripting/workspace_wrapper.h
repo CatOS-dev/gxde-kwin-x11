@@ -278,6 +278,11 @@ public:
 #endif
 
     /**
+     * Sets a window's frame geometry for Deepin window-management scripts.
+     */
+    Q_SCRIPTABLE void updateWindowGeometry(KWin::Window *client, const QRectF &geometry);
+
+    /**
      * Finds up to count windows at a particular location,
      * prioritizing the topmost one first.  A negative count
      * returns all matching clients.
