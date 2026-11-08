@@ -155,6 +155,17 @@ OverviewEffect::OverviewEffect()
     KGlobalAccel::self()->setShortcut(gridAction, {defaultGridShortcut});
     m_gridShortcut = KGlobalAccel::self()->shortcut(gridAction);
 
+    auto legacyGridAction = new QAction(this);
+    legacyGridAction->setObjectName(QStringLiteral("ShowDesktopGrid"));
+    legacyGridAction->setText(i18n("Show Desktop Grid"));
+    legacyGridAction->setAutoRepeat(false);
+    connect(legacyGridAction, &QAction::triggered, this, [this]() {
+        m_gridState->toggle();
+    });
+    KGlobalAccel::self()->setDefaultShortcut(legacyGridAction, {Qt::META | Qt::Key_F8});
+    KGlobalAccel::self()->setShortcut(legacyGridAction, {Qt::META | Qt::Key_F8});
+    m_gridShortcut += KGlobalAccel::self()->shortcut(legacyGridAction);
+
     connect(effects, &EffectsHandler::screenAboutToLock, this, &OverviewEffect::realDeactivate);
 
     OverviewConfig::instance(effects->config());
