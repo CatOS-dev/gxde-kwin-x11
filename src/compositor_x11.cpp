@@ -8,6 +8,7 @@
 */
 
 #include "compositor_x11.h"
+#include "atoms.h"
 #include "core/outputbackend.h"
 #include "core/overlaywindow.h"
 #include "core/renderbackend.h"
@@ -42,6 +43,16 @@ Q_DECLARE_METATYPE(KWin::X11Compositor::SuspendReason)
 
 namespace KWin
 {
+
+static void announceDeepinCompositingState(uint32_t state)
+{
+    xcb_connection_t *connection = kwinApp()->x11Connection();
+    if (connection && atoms && atoms->net_kde_composite_toggling.isValid()) {
+        xcb_change_property(connection, XCB_PROP_MODE_REPLACE, kwinApp()->x11RootWindow(),
+                            atoms->net_kde_composite_toggling, atoms->net_kde_composite_toggling,
+                            8, sizeof(state), &state);
+    }
+}
 
 class X11CompositorSelectionOwner : public KSelectionOwner
 {
@@ -367,6 +378,7 @@ void X11Compositor::start()
         m_releaseSelectionTimer.stop();
     }
 
+    announceDeepinCompositingState(1);
     Q_EMIT compositingToggled(true);
 }
 
@@ -375,6 +387,7 @@ void X11Compositor::stop()
     if (m_state == State::Off || m_state == State::Stopping) {
         return;
     }
+    announceDeepinCompositingState(0);
     m_state = State::Stopping;
     Q_EMIT aboutToToggleCompositing();
 

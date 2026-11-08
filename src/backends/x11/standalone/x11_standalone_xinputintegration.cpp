@@ -15,6 +15,7 @@
 #include "x11_standalone_cursor.h"
 #include "x11_standalone_logging.h"
 
+#include "effect/effecthandler.h"
 #include "effect/globals.h"
 #include "effect/xcb.h"
 #include "workspace.h"
@@ -58,7 +59,11 @@ public:
         } break;
         case XI_TouchBegin: {
             auto e = reinterpret_cast<xXIDeviceEvent *>(event);
-            m_lastTouchPositions.insert(e->detail, QPointF(fixed1616ToReal(e->event_x), fixed1616ToReal(e->event_y)));
+            const QPointF touchPosition(fixed1616ToReal(e->event_x), fixed1616ToReal(e->event_y));
+            m_lastTouchPositions.insert(e->detail, touchPosition);
+            if (effects) {
+                effects->touchDown(e->detail, touchPosition, std::chrono::milliseconds(e->time));
+            }
             break;
         }
         case XI_TouchUpdate: {
@@ -69,6 +74,9 @@ public:
                 workspace()->screenEdges()->gestureRecognizer()->updateSwipeGesture(touchPosition - last);
             }
             m_lastTouchPositions.insert(e->detail, touchPosition);
+            if (effects) {
+                effects->touchMotion(e->detail, touchPosition, std::chrono::milliseconds(e->time));
+            }
             break;
         }
         case XI_TouchEnd: {
@@ -78,6 +86,9 @@ public:
             }
             m_lastTouchPositions.remove(e->detail);
             m_trackingTouchId = 0;
+            if (effects) {
+                effects->touchUp(e->detail, std::chrono::milliseconds(e->time));
+            }
             break;
         }
         case XI_TouchOwnership: {
