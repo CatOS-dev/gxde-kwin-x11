@@ -85,6 +85,7 @@
 #include <QDBusConnection>
 #include <QDBusPendingCall>
 #include <QMetaProperty>
+#include <algorithm>
 // xcb
 #include <xcb/xinerama.h>
 
@@ -139,6 +140,17 @@ void Workspace::finishDelayedRaise()
         Window *candidate = *it;
         if (!candidate->isDeleted() && !candidate->isMinimized() && candidate->isOnCurrentDesktop()
             && candidate->wantsInput() && candidate->hitTest(releasePosition)) {
+#if KWIN_BUILD_X11
+            if (const auto *x11Window = dynamic_cast<const X11Window *>(candidate)) {
+                const QPointF localPosition = releasePosition - x11Window->bufferGeometry().topLeft();
+                const auto shape = x11Window->shapeRegion();
+                if (std::none_of(shape.cbegin(), shape.cend(), [&localPosition](const QRectF &rect) {
+                    return rect.contains(localPosition);
+                })) {
+                    continue;
+                }
+            }
+#endif
             releasedWindow = candidate;
             break;
         }

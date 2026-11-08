@@ -223,6 +223,10 @@ void Workspace::setActiveWindow(Window *window)
         return;
     }
 
+    if (m_moveResizeWindow && m_moveResizeWindow != window) {
+        m_moveResizeWindow->endInteractiveMoveResize();
+    }
+
     if (active_popup && m_activePopupWindow != window && m_setActiveWindowRecursion == 0) {
         closeActivePopup();
     }
@@ -300,6 +304,9 @@ void Workspace::activateWindow(Window *window, bool force)
     }
     if (!window->isClient() || window->isDeleted() || !window->wantsInput()) {
         return;
+    }
+    if (m_moveResizeWindow && m_moveResizeWindow != window) {
+        m_moveResizeWindow->endInteractiveMoveResize();
     }
     if (window->isHiddenByShowDesktop()) {
         ++block_focus;
