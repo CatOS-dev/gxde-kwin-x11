@@ -1847,10 +1847,11 @@ void X11Window::updateVisibility()
     if (isUnmanaged() || isDeleted()) {
         return;
     }
+    const bool hasScene = Compositor::self() && Compositor::self()->scene();
     if (isHidden()) {
         info->setState(NET::Hidden, NET::Hidden);
         setSkipTaskbar(true); // Also hide from taskbar
-        if (Compositor::compositing() && options->hiddenPreviews() == HiddenPreviewsAlways) {
+        if (hasScene && options->hiddenPreviews() == HiddenPreviewsAlways) {
             internalKeep();
         } else {
             internalHide();
@@ -1861,7 +1862,7 @@ void X11Window::updateVisibility()
         if (waylandServer()) {
             return;
         }
-        if (Compositor::compositing() && options->hiddenPreviews() != HiddenPreviewsNever) {
+        if (hasScene && options->hiddenPreviews() != HiddenPreviewsNever) {
             internalKeep();
         } else {
             internalHide();
@@ -1871,7 +1872,7 @@ void X11Window::updateVisibility()
     setSkipTaskbar(originalSkipTaskbar()); // Reset from 'hidden'
     if (isMinimized()) {
         info->setState(NET::Hidden, NET::Hidden);
-        if (Compositor::compositing() && options->hiddenPreviews() == HiddenPreviewsAlways) {
+        if (hasScene && options->hiddenPreviews() == HiddenPreviewsAlways) {
             internalKeep();
         } else {
             internalHide();
@@ -1880,7 +1881,7 @@ void X11Window::updateVisibility()
     }
     info->setState(NET::States(), NET::Hidden);
     if (!isOnCurrentDesktop()) {
-        if (Compositor::compositing() && options->hiddenPreviews() != HiddenPreviewsNever) {
+        if (hasScene && options->hiddenPreviews() != HiddenPreviewsNever) {
             internalKeep();
         } else {
             internalHide();
@@ -1888,7 +1889,7 @@ void X11Window::updateVisibility()
         return;
     }
     if (!isOnCurrentActivity()) {
-        if (Compositor::compositing() && options->hiddenPreviews() != HiddenPreviewsNever) {
+        if (hasScene && options->hiddenPreviews() != HiddenPreviewsNever) {
             internalKeep();
         } else {
             internalHide();
@@ -1951,7 +1952,7 @@ void X11Window::internalHide()
 
 void X11Window::internalKeep()
 {
-    Q_ASSERT(Compositor::compositing());
+    Q_ASSERT(Compositor::self() && Compositor::self()->scene());
     if (mapping_state == Kept) {
         return;
     }
