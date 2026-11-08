@@ -37,6 +37,7 @@
 #include "virtualdesktops.h"
 #include "wayland/surface.h"
 #include "wayland_server.h"
+#include "windowstyle/decorationstyle.h"
 #include "workspace.h"
 #include <KDecoration3/DecoratedWindow>
 #include <KDecoration3/Decoration>
@@ -733,6 +734,10 @@ bool X11Window::manage(xcb_window_t w, bool isMapped)
     KStartupInfoData asn_data;
     bool asn_valid = workspace()->checkStartupNotification(window(), asn_id, asn_data);
 
+    createWinStyle();
+    connect(windowStyleObj(), &DecorationStyle::mouseInputAreaMarginsChanged,
+            this, &X11Window::updateInputWindow);
+
     // Make sure that the input window is created before we update the stacking order
     updateInputWindow();
     updateLayer();
@@ -1296,12 +1301,17 @@ void X11Window::updateInputWindow()
 
     QRegion region;
 
-    if (decoration()) {
-        const QMarginsF &r = decoration()->resizeOnlyBorders();
-        const qreal left = r.left();
-        const qreal top = r.top();
-        const qreal right = r.right();
-        const qreal bottom = r.bottom();
+    if (decoration() || (isResizable() && !isSpecialWindow())) {
+        QMarginsF margins(10, 10, 10, 10);
+        if (decoration()) {
+            margins = decoration()->resizeOnlyBorders();
+        } else if (windowStyleObj()->propertyIsValid(DecorationStyle::MouseInputAreaMarginsProperty)) {
+            margins = windowStyleObj()->mouseInputAreaMargins();
+        }
+        const int left = qBound(0, qRound(margins.left()), 64);
+        const int top = qBound(0, qRound(margins.top()), 64);
+        const int right = qBound(0, qRound(margins.right()), 64);
+        const int bottom = qBound(0, qRound(margins.bottom()), 64);
         if (left != 0 || top != 0 || right != 0 || bottom != 0) {
             region = QRegion(-left,
                              -top,

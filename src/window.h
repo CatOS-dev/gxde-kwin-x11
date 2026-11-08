@@ -1766,10 +1766,10 @@ protected:
     virtual QSizeF resizeIncrements() const;
 
     /**
-     * Returns the interactive move resize gravity depending on the Decoration's section
-     * under mouse. If no decoration it returns Gravity::None.
+     * Returns the interactive move resize gravity for the decoration or X11 input border.
      */
     Gravity mouseGravity() const;
+    void updateExtendedInputSection(const QPointF &position);
 
     void setDecoration(std::shared_ptr<KDecoration3::Decoration> decoration);
     void startDecorationDoubleClickTimer();
@@ -1924,6 +1924,7 @@ protected:
         QElapsedTimer doubleClickTimer;
         QRegion inputRegion;
     } m_decoration;
+    Qt::WindowFrameSection m_extendedInputSection = Qt::NoSection;
     QString m_desktopFileName;
 
     bool m_applicationMenuActive = false;

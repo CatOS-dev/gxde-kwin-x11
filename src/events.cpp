@@ -1070,6 +1070,9 @@ bool X11Window::buttonPressEvent(xcb_window_t w, int button, int state, int x, i
     if (w == inputId()) {
         x = x_root - frameGeometry().x();
         y = y_root - frameGeometry().y();
+        if (!isDecorated()) {
+            updateExtendedInputSection(QPointF(x, y));
+        }
         return processDecorationButtonPress(QPoint(x, y), QPoint(x_root, y_root), x11ToQtMouseButton(button), true);
     }
     if (w == frameId() && isDecorated()) {
@@ -1185,6 +1188,8 @@ bool X11Window::motionNotifyEvent(xcb_window_t w, int state, int x, int y, int x
             if (isDecorated()) {
                 QHoverEvent event(QEvent::HoverMove, QPointF(x, y), QPointF(x, y));
                 QCoreApplication::instance()->sendEvent(decoration(), &event);
+            } else {
+                updateExtendedInputSection(QPointF(x, y));
             }
         }
         Gravity newGravity = modKeyDown(state) ? Gravity::None : mouseGravity();

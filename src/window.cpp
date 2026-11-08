@@ -2892,29 +2892,52 @@ void Window::dontInteractiveMoveResize()
 
 Gravity Window::mouseGravity() const
 {
-    if (isDecorated()) {
-        switch (decoration()->sectionUnderMouse()) {
-        case Qt::BottomLeftSection:
-            return Gravity::BottomLeft;
-        case Qt::BottomRightSection:
-            return Gravity::BottomRight;
-        case Qt::BottomSection:
-            return Gravity::Bottom;
-        case Qt::LeftSection:
-            return Gravity::Left;
-        case Qt::RightSection:
-            return Gravity::Right;
-        case Qt::TopSection:
-            return Gravity::Top;
-        case Qt::TopLeftSection:
-            return Gravity::TopLeft;
-        case Qt::TopRightSection:
-            return Gravity::TopRight;
-        default:
-            return Gravity::None;
-        }
+    const Qt::WindowFrameSection section = isDecorated() ? decoration()->sectionUnderMouse() : m_extendedInputSection;
+    switch (section) {
+    case Qt::BottomLeftSection:
+        return Gravity::BottomLeft;
+    case Qt::BottomRightSection:
+        return Gravity::BottomRight;
+    case Qt::BottomSection:
+        return Gravity::Bottom;
+    case Qt::LeftSection:
+        return Gravity::Left;
+    case Qt::RightSection:
+        return Gravity::Right;
+    case Qt::TopSection:
+        return Gravity::Top;
+    case Qt::TopLeftSection:
+        return Gravity::TopLeft;
+    case Qt::TopRightSection:
+        return Gravity::TopRight;
+    default:
+        return Gravity::None;
     }
-    return Gravity::None;
+}
+
+void Window::updateExtendedInputSection(const QPointF &position)
+{
+    m_extendedInputSection = Qt::NoSection;
+    if (isDecorated() || !isResizable() || width() < 40 || height() < 40) {
+        return;
+    }
+
+    const bool left = position.x() < 20;
+    const bool right = position.x() >= width() - 20;
+    const bool top = position.y() < 20;
+    const bool bottom = position.y() >= height() - 20;
+
+    if (top) {
+        m_extendedInputSection = left ? Qt::TopLeftSection : right ? Qt::TopRightSection
+                                                                   : Qt::TopSection;
+    } else if (bottom) {
+        m_extendedInputSection = left ? Qt::BottomLeftSection : right ? Qt::BottomRightSection
+                                                                      : Qt::BottomSection;
+    } else if (left) {
+        m_extendedInputSection = Qt::LeftSection;
+    } else if (right) {
+        m_extendedInputSection = Qt::RightSection;
+    }
 }
 
 void Window::endInteractiveMoveResize()
@@ -3082,7 +3105,7 @@ bool Window::processDecorationButtonPress(const QPointF &localPos, const QPointF
                 m_decoration.doubleClickTimer.start(); // expired -> new first click and pot. init
             } else {
                 Options::WindowOperation operation;
-                switch (decoration()->sectionUnderMouse()) {
+                switch (isDecorated() ? decoration()->sectionUnderMouse() : m_extendedInputSection) {
                 case Qt::TitleBarArea:
                     operation = options->operationTitlebarDblClick();
                     break;
