@@ -1,3 +1,13 @@
+gxde-kwin-x11 (4:6.7.6-11) unstable; urgency=medium
+
+  * Restore Deepin's disable split preview window rule in the X11 core,
+    split effect, and private rules editor.
+  * Restore Deepin's disable corner and enable shadow window rules.
+  * Refresh Deepin window radius and shadow after the compositor starts.
+  * Keep X11 desktop windows opaque across session restore and property updates.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 20:25:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-10) unstable; urgency=medium
 
   * Respect non-maximizable windows in Deepin's maximize keyboard shortcut.
