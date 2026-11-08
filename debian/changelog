@@ -1,3 +1,9 @@
+gxde-kwin-x11 (4:6.7.6-10) unstable; urgency=medium
+
+  * Respect non-maximizable windows in Deepin's maximize keyboard shortcut.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 20:21:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-9) unstable; urgency=medium
 
   * Finish interactive moves before Deepin window keyboard actions.
