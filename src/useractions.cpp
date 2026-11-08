@@ -928,7 +928,9 @@ void Workspace::initShortcuts()
     initShortcut("Window Close", i18n("Close Window"),
                  Qt::ALT | Qt::Key_F4, &Workspace::slotWindowClose, true);
     initShortcut("Window Maximize", i18n("Maximize Window"),
-                 Qt::META | Qt::Key_PageUp, &Workspace::slotWindowMaximize, false);
+                 Qt::META | Qt::Key_Up, &Workspace::slotWindowMaximizeByShortcut, false);
+    initShortcut("Window Unmaximize", i18n("Restore Window"),
+                 Qt::META | Qt::Key_Down, &Workspace::slotWindowUnMaximizeByShortcut, false);
     initShortcut("Window Maximize Vertical", i18n("Maximize Window Vertically"),
                  0, &Workspace::slotWindowMaximizeVertical, false);
     initShortcut("Window Maximize Horizontal", i18n("Maximize Window Horizontally"),
@@ -982,9 +984,9 @@ void Workspace::initShortcuts()
     initShortcut("Window Quick Tile Right", i18n("Quick Tile Window to the Right"),
                  Qt::META | Qt::Key_Right, std::bind(&Workspace::quickTileWindow, this, QuickTileFlag::Right), true);
     initShortcut("Window Quick Tile Top", i18n("Quick Tile Window to the Top"),
-                 Qt::META | Qt::Key_Up, std::bind(&Workspace::quickTileWindow, this, QuickTileFlag::Top), true);
+                 0, std::bind(&Workspace::quickTileWindow, this, QuickTileFlag::Top), true);
     initShortcut("Window Quick Tile Bottom", i18n("Quick Tile Window to the Bottom"),
-                 Qt::META | Qt::Key_Down, std::bind(&Workspace::quickTileWindow, this, QuickTileFlag::Bottom), true);
+                 0, std::bind(&Workspace::quickTileWindow, this, QuickTileFlag::Bottom), true);
     initShortcut("Window Quick Tile Top Left", i18n("Quick Tile Window to the Top Left"),
                  0, std::bind(&Workspace::quickTileWindow, this, QuickTileFlag::Top | QuickTileFlag::Left), true);
     initShortcut("Window Quick Tile Bottom Left", i18n("Quick Tile Window to the Bottom Left"),
@@ -1381,6 +1383,24 @@ void Workspace::slotWindowMaximize()
     if (USABLE_ACTIVE_WINDOW) {
         resetInteractiveMoveResize();
         performWindowOperation(m_activeWindow, Options::MaximizeOp);
+    }
+}
+
+void Workspace::slotWindowMaximizeByShortcut()
+{
+    if (USABLE_ACTIVE_WINDOW) {
+        resetInteractiveMoveResize();
+        m_activeWindow->maximize(MaximizeFull);
+        takeActivity(m_activeWindow, ActivityFocus | ActivityRaise);
+    }
+}
+
+void Workspace::slotWindowUnMaximizeByShortcut()
+{
+    if (USABLE_ACTIVE_WINDOW) {
+        resetInteractiveMoveResize();
+        m_activeWindow->maximize(MaximizeRestore);
+        takeActivity(m_activeWindow, ActivityFocus | ActivityRaise);
     }
 }
 

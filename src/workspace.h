@@ -516,6 +516,8 @@ public Q_SLOTS:
     void slotToggleShowDesktop();
 
     void slotWindowMaximize();
+    void slotWindowMaximizeByShortcut();
+    void slotWindowUnMaximizeByShortcut();
     void slotWindowMaximizeVertical();
     void slotWindowMaximizeHorizontal();
     void tileActiveWindow(int side);
