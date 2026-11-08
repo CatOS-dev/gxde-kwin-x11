@@ -52,6 +52,9 @@ public:
             if (m_x11Cursor) {
                 m_x11Cursor->notifyCursorPosChanged();
             }
+            if (ge->event_type == XI_RawButtonRelease && workspace()) {
+                workspace()->finishDelayedRaise();
+            }
         } break;
         case XI_TouchBegin: {
             auto e = reinterpret_cast<xXIDeviceEvent *>(event);
@@ -181,11 +184,15 @@ void XInputIntegration::startListening()
     evmasks[0].deviceid = XIAllMasterDevices;
     evmasks[0].mask_len = sizeof(mask1);
     evmasks[0].mask = mask1;
-    XISelectEvents(display(), rootWindow(), evmasks, 1);
+    if (XISelectEvents(display(), rootWindow(), evmasks, 1) != Success) {
+        qCWarning(KWIN_X11STANDALONE) << "Failed to select XInput events";
+        return;
+    }
 
     m_xiEventFilter = std::make_unique<XInputEventFilter>(m_xiOpcode);
     m_xiEventFilter->setCursor(m_x11Cursor);
     m_xiEventFilter->setDisplay(display());
+    workspace()->setDelayedRaiseAvailable(true);
 }
 
 }

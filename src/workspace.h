@@ -21,6 +21,7 @@
 #include <netwm_def.h>
 // Qt
 #include <QList>
+#include <QPointer>
 #include <QSet>
 #include <QStringList>
 #include <QTimer>
@@ -212,6 +213,10 @@ public:
     };
     Q_DECLARE_FLAGS(ActivityFlags, ActivityFlag)
     bool takeActivity(Window *window, ActivityFlags flags);
+    bool delayedRaiseAvailable() const;
+    void setDelayedRaiseAvailable(bool available);
+    void beginDelayedRaise(Window *window, const QPointF &pressPosition);
+    void finishDelayedRaise();
     bool restoreFocus();
     void gotFocusIn(const Window *window);
     void setShouldGetFocus(Window *window);
@@ -705,6 +710,9 @@ private:
     QList<Window *> m_windows;
     QList<Window *> m_previewClients;
     QSet<Window *> m_previewRestoredMinimized;
+    QPointer<Window> m_delayedRaiseWindow;
+    QPointF m_delayedRaisePressPosition;
+    bool m_delayedRaiseAvailable = false;
     QList<Window *> deleted;
 
     QList<Window *> unconstrained_stacking_order; // Topmost last

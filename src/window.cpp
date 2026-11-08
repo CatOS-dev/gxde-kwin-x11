@@ -2329,7 +2329,14 @@ bool Window::performMousePressCommand(Options::MouseCommand cmd, const QPointF &
         replay = replay || !rules()->checkAcceptFocus(acceptsFocus());
         break;
     case Options::MouseActivateRaiseAndPassClick:
-        workspace()->takeActivity(this, Workspace::ActivityFocus | Workspace::ActivityRaise);
+        if (kwinApp()->operationMode() == Application::OperationModeX11
+            && resourceName() == QByteArrayLiteral("dde-file-manager")
+            && workspace()->delayedRaiseAvailable()) {
+            workspace()->takeActivity(this, Workspace::ActivityFocus);
+            workspace()->beginDelayedRaise(this, globalPos);
+        } else {
+            workspace()->takeActivity(this, Workspace::ActivityFocus | Workspace::ActivityRaise);
+        }
         workspace()->setActiveOutput(globalPos);
         replay = true;
         break;

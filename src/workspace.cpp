@@ -103,6 +103,57 @@ X11EventFilter *X11EventFilterContainer::filter() const
 
 Workspace *Workspace::_self = nullptr;
 
+bool Workspace::delayedRaiseAvailable() const
+{
+    return m_delayedRaiseAvailable;
+}
+
+void Workspace::setDelayedRaiseAvailable(bool available)
+{
+    m_delayedRaiseAvailable = available;
+    if (!available) {
+        m_delayedRaiseWindow.clear();
+    }
+}
+
+void Workspace::beginDelayedRaise(Window *window, const QPointF &pressPosition)
+{
+    if (m_delayedRaiseAvailable) {
+        m_delayedRaiseWindow = window;
+        m_delayedRaisePressPosition = pressPosition;
+    }
+}
+
+void Workspace::finishDelayedRaise()
+{
+    Window *pressedWindow = m_delayedRaiseWindow.data();
+    m_delayedRaiseWindow.clear();
+    if (!pressedWindow || !m_windows.contains(pressedWindow)) {
+        return;
+    }
+
+    const QPointF releasePosition = Cursors::self()->mouse()->pos();
+    Window *releasedWindow = nullptr;
+    const auto &order = stackingOrder();
+    for (auto it = order.crbegin(); it != order.crend(); ++it) {
+        Window *candidate = *it;
+        if (!candidate->isDeleted() && !candidate->isMinimized() && candidate->isOnCurrentDesktop()
+            && candidate->wantsInput() && candidate->hitTest(releasePosition)) {
+            releasedWindow = candidate;
+            break;
+        }
+    }
+    if (!releasedWindow) {
+        return;
+    }
+
+    const QPointF movement = releasePosition - m_delayedRaisePressPosition;
+    Window *target = releasedWindow == pressedWindow || (qAbs(movement.x()) < 10 && qAbs(movement.y()) < 10)
+        ? pressedWindow
+        : releasedWindow;
+    takeActivity(target, ActivityFocus | ActivityRaise);
+}
+
 Workspace::Workspace()
     : QObject(nullptr)
     // Unsorted
