@@ -6,6 +6,7 @@
 */
 #include "windowstylemanager.h"
 
+#include "compositor.h"
 #include "window.h"
 #include "windowstyle/decorationstyle.h"
 #include "workspace.h"
@@ -47,6 +48,15 @@ WindowStyleManager::WindowStyleManager(QObject *parent)
 
     QCoreApplication::instance()->installEventFilter(this);
     connect(workspace(), &Workspace::windowAdded, this, &WindowStyleManager::onWindowAdded);
+    if (Compositor *compositor = Compositor::self()) {
+        connect(compositor, &Compositor::compositingToggled, this, [this](bool active) {
+            if (active) {
+                for (Window *window : workspace()->windows()) {
+                    window->updateWindowRadius(true);
+                }
+            }
+        });
+    }
 
     readAppearanceService(QStringLiteral("org.deepin.dde.Appearance1"),
                           QStringLiteral("/org/deepin/dde/Appearance1"),
