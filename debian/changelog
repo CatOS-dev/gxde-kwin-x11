@@ -4,6 +4,7 @@ gxde-kwin-x11 (4:6.7.6-9) unstable; urgency=medium
   * Resolve local X11 client PIDs through XRes with a window property fallback.
   * Restore Deepin's maximize and restore keyboard shortcuts.
   * Throttle repeated Alt-Tab navigation keys, including tilde.
+  * Keep the dock visible when Alt-Tab previews the desktop.
   * Rebuild the X11 executable and D-Bus adaptor before packaging.
 
  -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 19:49:00 -0600
