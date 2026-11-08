@@ -1,3 +1,10 @@
+gxde-kwin-x11 (4:6.7.6-12) unstable; urgency=medium
+
+  * Restore Deepin's outer resize input border for borderless X11 windows.
+  * Honor DTK input margins and exclude desktop and dock windows.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 20:45:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-11) unstable; urgency=medium
 
   * Restore Deepin's disable split preview window rule in the X11 core,
