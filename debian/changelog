@@ -1,3 +1,10 @@
+gxde-kwin-x11 (4:6.7.6-13) unstable; urgency=medium
+
+  * Announce Deepin's X11 compositor start transition before scene setup.
+  * Report a stopped compositor if OpenGL initialization fails.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 21:08:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-12) unstable; urgency=medium
 
   * Restore Deepin's outer resize input border for borderless X11 windows.
