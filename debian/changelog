@@ -1,3 +1,10 @@
+gxde-kwin-x11 (4:6.7.6-3) unstable; urgency=medium
+
+  * Port the Deepin Snap Helper effect to the KWin 6 rendering and window
+    movement interfaces.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 18:40:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-2) unstable; urgency=medium
 
   * Give the bundled KDecoration 3 library a private SONAME so the GXDE
