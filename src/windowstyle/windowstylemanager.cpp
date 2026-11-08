@@ -10,6 +10,7 @@
 #include "windowstyle/decorationstyle.h"
 #include "workspace.h"
 
+#include <QColor>
 #include <QCoreApplication>
 #include <QDBusConnection>
 #include <QDBusInterface>
@@ -29,6 +30,7 @@ WindowStyleManager::WindowStyleManager(QObject *parent)
     : QObject(parent)
 {
     m_darkTheme = QGuiApplication::palette().color(QPalette::Window).lightness() < 128;
+    m_activeColor = QGuiApplication::palette().color(QPalette::Highlight).name();
     if (QScreen *screen = QGuiApplication::primaryScreen()) {
         m_scale = std::clamp(screen->logicalDotsPerInch() / 96.0, qreal(1), qreal(8));
         connect(screen, &QScreen::logicalDotsPerInchChanged, this, [this](qreal dpi) {
@@ -63,6 +65,11 @@ qreal WindowStyleManager::osScale() const
     return m_scale;
 }
 
+QString WindowStyleManager::activeColor() const
+{
+    return m_activeColor;
+}
+
 bool WindowStyleManager::isDarkTheme() const
 {
     return m_darkTheme;
@@ -72,6 +79,9 @@ bool WindowStyleManager::eventFilter(QObject *watched, QEvent *event)
 {
     if (watched == QCoreApplication::instance() && event->type() == QEvent::ApplicationPaletteChange) {
         setDarkTheme(QGuiApplication::palette().color(QPalette::Window).lightness() < 128);
+        if (!m_hasAppearanceAccent) {
+            m_activeColor = QGuiApplication::palette().color(QPalette::Highlight).name();
+        }
     }
     return QObject::eventFilter(watched, event);
 }
@@ -97,6 +107,7 @@ void WindowStyleManager::readAppearanceService(const QString &service, const QSt
     if (theme.isValid()) {
         setDarkTheme(theme.toString().contains(QStringLiteral("dark"), Qt::CaseInsensitive));
     }
+    setActiveColor(appearance.property("QtActiveColor").toString());
 }
 
 void WindowStyleManager::onPropertiesChanged(const QString &interfaceName,
@@ -104,7 +115,10 @@ void WindowStyleManager::onPropertiesChanged(const QString &interfaceName,
                                              const QStringList &invalidatedProperties)
 {
     Q_UNUSED(interfaceName)
-    Q_UNUSED(invalidatedProperties)
+    if (invalidatedProperties.contains(QStringLiteral("QtActiveColor"))) {
+        m_hasAppearanceAccent = false;
+        m_activeColor = QGuiApplication::palette().color(QPalette::Highlight).name();
+    }
 
     if (changedProperties.contains(QStringLiteral("WindowRadius"))) {
         setOsRadius(changedProperties.value(QStringLiteral("WindowRadius")).toDouble());
@@ -112,6 +126,19 @@ void WindowStyleManager::onPropertiesChanged(const QString &interfaceName,
     if (changedProperties.contains(QStringLiteral("GtkTheme"))) {
         setDarkTheme(changedProperties.value(QStringLiteral("GtkTheme")).toString().contains(QStringLiteral("dark"), Qt::CaseInsensitive));
     }
+    if (changedProperties.contains(QStringLiteral("QtActiveColor"))) {
+        setActiveColor(changedProperties.value(QStringLiteral("QtActiveColor")).toString());
+    }
+}
+
+void WindowStyleManager::setActiveColor(const QString &color)
+{
+    const QColor accent(color);
+    if (!accent.isValid()) {
+        return;
+    }
+    m_hasAppearanceAccent = true;
+    m_activeColor = accent.name();
 }
 
 void WindowStyleManager::setOsRadius(qreal radius)

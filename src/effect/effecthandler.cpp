@@ -44,6 +44,7 @@
 #include "virtualdesktops.h"
 #include "wayland_server.h"
 #include "window_property_notify_x11_filter.h"
+#include "windowstyle/windowstylemanager.h"
 #include "workspace.h"
 #if KWIN_BUILD_X11
 #include "x11window.h"
@@ -867,7 +868,7 @@ void EffectsHandler::setShowingDesktop(bool showing)
 
 QString EffectsHandler::getActiveColor() const
 {
-    return QStringLiteral("#0081ff");
+    return workspace()->windowStyleManager()->activeColor();
 }
 
 void EffectsHandler::setKeepAbove(EffectWindow *effectWindow, bool keepAbove)

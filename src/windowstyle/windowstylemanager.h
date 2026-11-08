@@ -7,6 +7,7 @@
 #pragma once
 
 #include <QObject>
+#include <QString>
 #include <QVariantMap>
 
 namespace KWin
@@ -23,6 +24,7 @@ public:
 
     qreal osRadius() const;
     qreal osScale() const;
+    QString activeColor() const;
     bool isDarkTheme() const;
     void setDarkTheme(bool dark);
 
@@ -41,11 +43,14 @@ private:
     bool eventFilter(QObject *watched, QEvent *event) override;
     void readAppearanceService(const QString &service, const QString &path, const QString &interfaceName);
     void setOsRadius(qreal radius);
+    void setActiveColor(const QString &color);
     void refreshAllWindows();
 
     qreal m_osRadius = 18;
     qreal m_scale = 1;
     bool m_darkTheme = false;
+    QString m_activeColor;
+    bool m_hasAppearanceAccent = false;
 };
 
 } // namespace KWin
