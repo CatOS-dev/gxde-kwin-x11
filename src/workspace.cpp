@@ -1415,6 +1415,9 @@ void Workspace::updateOutputs(const std::optional<QList<Output *>> &outputOrder)
     m_placementTracker->restore(getPlacementTrackerHash());
 
     for (Output *output : removed) {
+        if (m_outputOrder.removeAll(output) > 0) {
+            Q_EMIT outputOrderChanged();
+        }
         output->unref();
     }
 

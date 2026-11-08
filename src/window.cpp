@@ -4710,7 +4710,14 @@ void Window::setupWindowRules()
 {
     disconnect(this, &Window::captionNormalChanged, this, &Window::evaluateWindowRules);
     m_rules = workspace()->rulebook()->find(this);
+    connect(workspace()->rulebook(), &RuleBook::allRulesDeleted,
+            this, &Window::clearWindowRules, Qt::UniqueConnection);
     // check only after getting the rules, because there may be a rule forcing window type
+}
+
+void Window::clearWindowRules()
+{
+    m_rules.clear();
 }
 
 void Window::updateWindowRules(Rules::Types selection)

@@ -1111,6 +1111,7 @@ public:
     }
     void removeRule(Rules *r);
     void setupWindowRules();
+    void clearWindowRules();
     void finishWindowRules();
     void evaluateWindowRules();
     virtual void updateWindowRules(Rules::Types selection);

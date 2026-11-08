@@ -35,6 +35,7 @@ class WindowRules
 public:
     explicit WindowRules(const QList<Rules *> &rules);
     WindowRules();
+    void clear();
     void update(Window *, int selection);
     bool contains(const Rules *rule) const;
     void remove(Rules *rule);
@@ -319,6 +320,9 @@ public:
     void requestDiskStorage();
     void setConfig(const KSharedConfig::Ptr &config);
 
+Q_SIGNALS:
+    void allRulesDeleted();
+
 private Q_SLOTS:
     void save();
 
@@ -368,6 +372,11 @@ inline WindowRules::WindowRules(const QList<Rules *> &r)
 
 inline WindowRules::WindowRules()
 {
+}
+
+inline void WindowRules::clear()
+{
+    rules.clear();
 }
 
 inline bool WindowRules::contains(const Rules *rule) const

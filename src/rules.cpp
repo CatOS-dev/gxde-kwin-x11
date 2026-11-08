@@ -927,6 +927,7 @@ void RuleBook::deleteAll()
 {
     qDeleteAll(m_rules);
     m_rules.clear();
+    Q_EMIT allRulesDeleted();
 }
 
 WindowRules RuleBook::find(const Window *window) const
