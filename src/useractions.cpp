@@ -1816,7 +1816,7 @@ void Workspace::slotWindowResize()
 
 void Workspace::resetInteractiveMoveResize()
 {
-    if (m_activeWindow && m_activeWindow->isInteractiveMoveResize()) {
+    if (m_activeWindow && (m_activeWindow->isInteractiveMove() || m_activeWindow->isInteractiveResize())) {
         m_activeWindow->endInteractiveMoveResize();
     }
 }
