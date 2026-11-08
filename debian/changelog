@@ -1,3 +1,15 @@
+gxde-kwin-x11 (4:6.7.6-6) unstable; urgency=medium
+
+  * Raise Deepin File Manager on XInput button release when available.
+  * Synchronize the Appearance icon theme and window-menu fonts.
+  * Preserve live window rules on reload and apply Deepin shadow and radius
+    fixes for X11 windows.
+  * Remove unplugged outputs from the published output order.
+  * Forward X11 touch events to Multitask View and Touch Points effects.
+  * Restore the Deepin compositing state root-window property.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 19:17:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-5) unstable; urgency=medium
 
   * Restore Deepin Dock preview, tiling signals, and X11 window hints.
