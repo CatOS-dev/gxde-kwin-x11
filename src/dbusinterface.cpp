@@ -26,6 +26,7 @@
 #include "window.h"
 #include "workspace.h"
 #if KWIN_BUILD_X11
+#include "compositor_x11.h"
 #include "x11window.h"
 #endif
 #if KWIN_BUILD_ACTIVITIES
@@ -341,6 +342,24 @@ bool CompositorDBusInterface::isOpenGLBroken() const
 bool CompositorDBusInterface::platformRequiresCompositing() const
 {
     return kwinApp()->operationMode() != Application::OperationModeX11; // TODO: Remove this property?
+}
+
+void CompositorDBusInterface::suspend()
+{
+#if KWIN_BUILD_X11
+    if (auto *compositor = qobject_cast<X11Compositor *>(m_compositor)) {
+        compositor->suspend(X11Compositor::UserSuspend);
+    }
+#endif
+}
+
+void CompositorDBusInterface::resume()
+{
+#if KWIN_BUILD_X11
+    if (auto *compositor = qobject_cast<X11Compositor *>(m_compositor)) {
+        compositor->resume(X11Compositor::UserSuspend);
+    }
+#endif
 }
 
 void CompositorDBusInterface::reinitialize()

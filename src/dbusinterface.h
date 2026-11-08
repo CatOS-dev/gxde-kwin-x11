@@ -171,6 +171,8 @@ public:
     bool platformRequiresCompositing() const;
 
 public Q_SLOTS:
+    void suspend();
+    void resume();
     /**
      * @brief Used by Compositing KCM after settings change.
      *
@@ -180,6 +182,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void compositingToggled(bool active);
+    void effectsEnabledChanged(bool enabled);
 
 private:
     Compositor *m_compositor;
