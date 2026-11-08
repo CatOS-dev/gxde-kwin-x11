@@ -221,6 +221,12 @@ bool DBusInterface::isOnCurrentDesktop(int window)
 #endif
 }
 
+void DBusInterface::disableGlobalShortcutsForClient(bool disable)
+{
+    workspace()->setDisableGlobalShortcutsByUser(disable);
+    workspace()->disableGlobalShortcutsForClient(disable);
+}
+
 void DBusInterface::previewWindows(const QList<uint> &windowIds)
 {
     QList<Window *> clients;

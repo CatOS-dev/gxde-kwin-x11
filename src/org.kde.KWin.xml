@@ -55,6 +55,9 @@
         <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QList&lt;uint&gt;"/>
         <arg name="windowIds" type="au" direction="in"/>
     </method>
+    <method name="disableGlobalShortcutsForClient">
+        <arg name="disable" type="b" direction="in"/>
+    </method>
     <method name="quitPreviewWindows">
         <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
     </method>

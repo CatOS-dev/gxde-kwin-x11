@@ -413,6 +413,7 @@ public:
     void windowShortcutUpdated(Window *window);
     bool shortcutAvailable(const QKeySequence &cut, Window *ignore = nullptr) const;
     bool globalShortcutsDisabled() const;
+    void setDisableGlobalShortcutsByUser(bool disabled);
     void disableGlobalShortcutsForClient(bool disable);
 
     void setWasUserInteraction();
@@ -748,6 +749,7 @@ private:
     ShortcutDialog *m_windowKeysDialog = nullptr;
     Window *m_windowKeysWindow = nullptr;
     bool m_globalShortcutsDisabledForWindow = false;
+    bool m_globalShortcutsDisabledByUser = false;
 
     // Timer to collect requests for 'reconfigure'
     QTimer reconfigureTimer;

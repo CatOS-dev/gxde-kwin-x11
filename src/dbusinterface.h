@@ -91,6 +91,7 @@ public Q_SLOTS: // METHODS
 
     Q_NOREPLY void showDesktop(bool show);
     bool isOnCurrentDesktop(int window);
+    void disableGlobalShortcutsForClient(bool disable);
     Q_NOREPLY void previewWindows(const QList<uint> &windowIds);
     Q_NOREPLY void quitPreviewWindows();
 
