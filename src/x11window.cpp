@@ -55,12 +55,14 @@
 #include <QPainter>
 #include <QProcess>
 // xcb
+#include <xcb/res.h>
 #include <xcb/xcb_icccm.h>
 // system
 #include <unistd.h>
 // c++
 #include <cmath>
 #include <csignal>
+#include <cstdlib>
 
 // Put all externs before the namespace statement to allow the linker
 // to resolve them properly
@@ -2166,7 +2168,7 @@ void X11Window::killProcess(bool ask, xcb_timestamp_t timestamp)
         return;
     }
     Q_ASSERT(!ask || timestamp != XCB_TIME_CURRENT_TIME);
-    pid_t pid = info->pid();
+    pid_t pid = this->pid();
     if (pid <= 0 || clientMachine()->hostName().isEmpty()) { // Needed properties missing
         return;
     }
@@ -2977,7 +2979,23 @@ QSizeF X11Window::implicitSize() const
 
 pid_t X11Window::pid() const
 {
-    return info->pid();
+    if (!m_pidQueried && window() != XCB_WINDOW_NONE) {
+        m_pidQueried = true;
+        const xcb_res_client_id_spec_t spec = {window(), XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID};
+        const auto cookie = xcb_res_query_client_ids_unchecked(connection(), 1, &spec);
+        auto reply = std::unique_ptr<xcb_res_query_client_ids_reply_t, decltype(&std::free)>(
+            xcb_res_query_client_ids_reply(connection(), cookie, nullptr), &std::free);
+        if (reply) {
+            for (auto it = xcb_res_query_client_ids_ids_iterator(reply.get()); it.rem; xcb_res_client_id_value_next(&it)) {
+                if (it.data->spec.mask == XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID
+                    && xcb_res_client_id_value_value_length(it.data) == 1) {
+                    m_pid = xcb_res_client_id_value_value(it.data)[0];
+                    break;
+                }
+            }
+        }
+    }
+    return m_pid > 0 ? m_pid : info->pid();
 }
 
 QString X11Window::windowRole() const

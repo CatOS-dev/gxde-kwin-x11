@@ -322,6 +322,7 @@ find_package(Canberra REQUIRED)
 
 if (KWIN_BUILD_X11)
     pkg_check_modules(XKBX11 IMPORTED_TARGET xkbcommon-x11 REQUIRED)
+    pkg_check_modules(XRES IMPORTED_TARGET xcb-res REQUIRED)
     add_feature_info(XKBX11 XKBX11_FOUND "Required for handling keyboard events in X11 backend")
 
     # All the required XCB components

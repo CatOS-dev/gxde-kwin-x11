@@ -534,6 +534,8 @@ private:
 
     bool m_unmanaged = false;
     bool m_outline = false;
+    mutable pid_t m_pid = 0;
+    mutable bool m_pidQueried = false;
     quint64 m_surfaceSerial = 0;
 };
 
