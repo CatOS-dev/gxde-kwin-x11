@@ -87,6 +87,7 @@ Build-Depends:
  libxkbcommon-dev (>= 0.7.0~),
  libxkbcommon-x11-dev,
  ninja-build,
+ patchelf,
  pkgconf,
  plasma-wayland-protocols (>= 1.14.0~),
  python3:any,
@@ -140,21 +141,13 @@ Package: libgxde-kdecorations3-6
 Section: libs
 Architecture: any
 Multi-Arch: same
-Provides:
- libkdecorations3-6 (= ${binary:Version}),
-Conflicts:
- libkdecorations3-6,
-Replaces:
- libkdecorations3-6,
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Description: KDecoration 3 runtime isolated for GXDE KWin X11
- This package contains the KDecoration 3 public runtime library required by
- gxde-kwin_x11. It intentionally omits Debian's Breaks against KDecoration 2,
- allowing the Qt 6 GXDE fork to coexist with GXDE's existing Qt 5 window
- manager. It conflicts only with the distribution package that owns the same
- KDecoration 3 library files.
+ This package contains a privately named KDecoration 3 runtime library used
+ by gxde-kwin_x11. Its separate SONAME and file path let it coexist with the
+ distribution KDecoration 3 package and GXDE's existing KDecoration 2 runtime.
 
 Package: libgxde-kwin-x11-6
 Section: libs

@@ -34,8 +34,22 @@ override_dh_auto_test:
 override_dh_auto_install:
 	dh_auto_install --destdir=debian/tmp
 	mkdir -p debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)
-	cp -a /usr/lib/$(DEB_HOST_MULTIARCH)/libkdecorations3.so.6* \
-		debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/
+	cp -L /usr/lib/$(DEB_HOST_MULTIARCH)/libkdecorations3.so.6 \
+		debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libgxde-kdecorations3.so.6.0.0
+	patchelf --set-soname libgxde-kdecorations3.so.6 \
+		debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libgxde-kdecorations3.so.6.0.0
+	ln -s libgxde-kdecorations3.so.6.0.0 \
+		debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libgxde-kdecorations3.so.6
+	find debian/tmp -type f -exec sh -c '\
+		for binary do \
+			if patchelf --print-needed "$$binary" 2>/dev/null | grep -qx libkdecorations3.so.6; then \
+				patchelf --replace-needed libkdecorations3.so.6 libgxde-kdecorations3.so.6 "$$binary"; \
+			fi; \
+		done' sh {} +
+
+override_dh_dwz:
+	# patchelf adds allocatable ELF sections that dwz cannot reorder.
+	:
 
 override_dh_missing:
 	dh_missing --fail-missing

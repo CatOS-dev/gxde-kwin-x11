@@ -1,3 +1,10 @@
+gxde-kwin-x11 (4:6.7.6-2) unstable; urgency=medium
+
+  * Give the bundled KDecoration 3 library a private SONAME so the GXDE
+    window manager can coexist with distribution KWin and KDecoration.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 18:30:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-1) unstable; urgency=medium
 
   * Initial Debian release.
