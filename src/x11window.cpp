@@ -1065,7 +1065,7 @@ bool X11Window::manage(xcb_window_t w, bool isMapped)
         setSkipPager(session->skipPager);
         setSkipSwitcher(session->skipSwitcher);
         setShade(session->shaded ? ShadeNormal : ShadeNone);
-        setOpacity(session->opacity);
+        setOpacity(isDesktop() ? 1.0 : session->opacity);
         setGeometryRestore(session->restore);
         if (session->maximized != MaximizeRestore) {
             maximize(MaximizeMode(session->maximized));
@@ -1108,7 +1108,7 @@ bool X11Window::manage(xcb_window_t w, bool isMapped)
         if (info->state() & NET::Modal) {
             setModal(true);
         }
-        setOpacity(info->opacityF());
+        setOpacity(isDesktop() ? 1.0 : info->opacityF());
 
         setFullScreen(rules()->checkFullScreen(info->state() & NET::FullScreen, !isMapped));
     }

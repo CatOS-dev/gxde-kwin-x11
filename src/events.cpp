@@ -419,7 +419,7 @@ bool X11Window::windowEvent(xcb_generic_event_t *e)
         }
         if (dirtyProperties2 & NET::WM2Opacity) {
             if (Compositor::compositing()) {
-                setOpacity(info->opacityF());
+                setOpacity(isDesktop() ? 1.0 : info->opacityF());
             } else {
                 // forward to the frame if there's possibly another compositing manager running
                 NETWinInfo i(kwinApp()->x11Connection(), frameId(), kwinApp()->x11RootWindow(), NET::Properties(), NET::Properties2());
