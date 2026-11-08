@@ -222,6 +222,7 @@ Workspace::Workspace()
     m_windowStyleManager = std::make_unique<WindowStyleManager>(this);
     connect(m_windowStyleManager.get(), &WindowStyleManager::radiusChanged, this, &Workspace::osRadiusChanged);
     connect(m_windowStyleManager.get(), &WindowStyleManager::themeChanged, this, &Workspace::osThemeChanged);
+    connect(m_windowStyleManager.get(), &WindowStyleManager::iconThemeChanged, this, &Workspace::iconThemeChanged);
     m_splitManage = std::make_unique<SplitManage>(this);
 
     initShortcuts();

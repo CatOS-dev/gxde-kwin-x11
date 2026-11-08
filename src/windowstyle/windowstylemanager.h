@@ -25,6 +25,8 @@ public:
     qreal osRadius() const;
     qreal osScale() const;
     QString activeColor() const;
+    qreal fontSizeScale() const;
+    QString fontFamily() const;
     bool isDarkTheme() const;
     void setDarkTheme(bool dark);
 
@@ -34,6 +36,7 @@ Q_SIGNALS:
     void radiusChanged(qreal radius);
     void themeChanged(bool dark);
     void scaleChanged(qreal scale);
+    void iconThemeChanged();
 
 private Q_SLOTS:
     void onWindowAdded(KWin::Window *window);
@@ -44,12 +47,17 @@ private:
     void readAppearanceService(const QString &service, const QString &path, const QString &interfaceName);
     void setOsRadius(qreal radius);
     void setActiveColor(const QString &color);
+    void setIconTheme(const QString &theme);
+    void setFontSize(qreal size);
+    void setFontFamily(const QString &family);
     void refreshAllWindows();
 
     qreal m_osRadius = 18;
     qreal m_scale = 1;
     bool m_darkTheme = false;
     QString m_activeColor;
+    QString m_fontFamily;
+    qreal m_fontSizeScale = 1;
     bool m_hasAppearanceAccent = false;
 };
 

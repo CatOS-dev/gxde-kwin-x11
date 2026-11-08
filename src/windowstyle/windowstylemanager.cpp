@@ -16,6 +16,7 @@
 #include <QDBusInterface>
 #include <QEvent>
 #include <QGuiApplication>
+#include <QIcon>
 #include <QPalette>
 #include <QScreen>
 
@@ -70,6 +71,16 @@ QString WindowStyleManager::activeColor() const
     return m_activeColor;
 }
 
+qreal WindowStyleManager::fontSizeScale() const
+{
+    return m_fontSizeScale;
+}
+
+QString WindowStyleManager::fontFamily() const
+{
+    return m_fontFamily;
+}
+
 bool WindowStyleManager::isDarkTheme() const
 {
     return m_darkTheme;
@@ -108,6 +119,9 @@ void WindowStyleManager::readAppearanceService(const QString &service, const QSt
         setDarkTheme(theme.toString().contains(QStringLiteral("dark"), Qt::CaseInsensitive));
     }
     setActiveColor(appearance.property("QtActiveColor").toString());
+    setIconTheme(appearance.property("IconTheme").toString());
+    setFontSize(appearance.property("FontSize").toDouble());
+    setFontFamily(appearance.property("StandardFont").toString());
 }
 
 void WindowStyleManager::onPropertiesChanged(const QString &interfaceName,
@@ -129,6 +143,15 @@ void WindowStyleManager::onPropertiesChanged(const QString &interfaceName,
     if (changedProperties.contains(QStringLiteral("QtActiveColor"))) {
         setActiveColor(changedProperties.value(QStringLiteral("QtActiveColor")).toString());
     }
+    if (changedProperties.contains(QStringLiteral("IconTheme"))) {
+        setIconTheme(changedProperties.value(QStringLiteral("IconTheme")).toString());
+    }
+    if (changedProperties.contains(QStringLiteral("FontSize"))) {
+        setFontSize(changedProperties.value(QStringLiteral("FontSize")).toDouble());
+    }
+    if (changedProperties.contains(QStringLiteral("StandardFont"))) {
+        setFontFamily(changedProperties.value(QStringLiteral("StandardFont")).toString());
+    }
 }
 
 void WindowStyleManager::setActiveColor(const QString &color)
@@ -139,6 +162,29 @@ void WindowStyleManager::setActiveColor(const QString &color)
     }
     m_hasAppearanceAccent = true;
     m_activeColor = accent.name();
+}
+
+void WindowStyleManager::setIconTheme(const QString &theme)
+{
+    if (theme.isEmpty() || theme == QIcon::themeName()) {
+        return;
+    }
+    QIcon::setThemeName(theme);
+    Q_EMIT iconThemeChanged();
+}
+
+void WindowStyleManager::setFontSize(qreal size)
+{
+    if (size > 0 && size < 100) {
+        m_fontSizeScale = std::clamp(size / 10.5, qreal(0.5), qreal(3));
+    }
+}
+
+void WindowStyleManager::setFontFamily(const QString &family)
+{
+    if (!family.isEmpty()) {
+        m_fontFamily = family;
+    }
 }
 
 void WindowStyleManager::setOsRadius(qreal radius)

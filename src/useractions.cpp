@@ -33,6 +33,7 @@
 #include "useractions.h"
 #include "virtualdesktops.h"
 #include "window.h"
+#include "windowstyle/windowstylemanager.h"
 #include "workspace.h"
 #if KWIN_BUILD_X11
 #include "x11window.h"
@@ -48,6 +49,8 @@
 
 #include <QAction>
 #include <QCheckBox>
+#include <QFont>
+#include <QGuiApplication>
 #include <QPushButton>
 #include <QWindow>
 
@@ -139,6 +142,17 @@ void UserActionsMenu::show(const QRect &pos, Window *window)
     }
     m_window = windowPtr;
     init();
+    const WindowStyleManager *style = workspace()->windowStyleManager();
+    QFont font = QGuiApplication::font();
+    if (!style->fontFamily().isEmpty()) {
+        font.setFamily(style->fontFamily());
+    }
+    if (font.pointSizeF() > 0) {
+        font.setPointSizeF(font.pointSizeF() * style->fontSizeScale());
+    } else if (font.pixelSize() > 0) {
+        font.setPixelSize(qRound(font.pixelSize() * style->fontSizeScale()));
+    }
+    m_menu->setFont(font);
     m_menu->popup(pos.bottomLeft());
 }
 

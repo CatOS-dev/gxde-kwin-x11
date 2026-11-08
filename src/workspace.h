@@ -593,6 +593,7 @@ Q_SIGNALS:
     void geometryChanged();
     void osRadiusChanged();
     void osThemeChanged();
+    void iconThemeChanged();
 
     // Signals required for the scripting interface
     void currentActivityChanged();
