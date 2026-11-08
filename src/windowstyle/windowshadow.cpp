@@ -11,6 +11,9 @@
 #include "windowstyle/windowradius.h"
 #include "windowstyle/windowstylemanager.h"
 #include "workspace.h"
+#if KWIN_BUILD_X11
+#include "x11window.h"
+#endif
 
 #include <QPainter>
 #include <QRadialGradient>
@@ -61,11 +64,17 @@ bool WindowShadow::updateWindowShadow()
     }
 
     const DecorationStyle *style = m_window->windowStyleObj();
+    bool hasClientAlpha = false;
+#if KWIN_BUILD_X11
+    if (const auto *x11Window = dynamic_cast<const X11Window *>(m_window)) {
+        hasClientAlpha = x11Window->hasAlpha();
+    }
+#endif
     if (m_window->maximizeMode() == MaximizeFull
         || m_window->isFullScreen()
         || m_window->isDesktop()
         || style->isCancelShadow()
-        || (!m_window->borderRedrawable() && !style->propertyIsValid(DecorationStyle::WindowRadiusProperty))) {
+        || (hasClientAlpha && !m_window->borderRedrawable() && !style->propertyIsValid(DecorationStyle::WindowRadiusProperty))) {
         const bool changed = isValid();
         clear();
         return changed;

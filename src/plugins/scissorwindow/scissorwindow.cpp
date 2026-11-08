@@ -87,7 +87,8 @@ bool ScissorWindow::shouldScissor(EffectWindow *window) const
     if (window->isScissorForce()) {
         return true;
     }
-    if (window->isDesktop() || window->isOutline() || window->isFullScreen() || effects->hasActiveFullScreenEffect()) {
+    if (window->isDesktop() || window->isOutline() || window->isFullScreen()
+        || effects->isSplitWin(window) || effects->hasActiveFullScreenEffect()) {
         return false;
     }
     if (window->window()->maximizeMode() == MaximizeFull) {
