@@ -1,3 +1,11 @@
+gxde-kwin-x11 (4:6.7.6-5) unstable; urgency=medium
+
+  * Restore Deepin Dock preview, tiling signals, and X11 window hints.
+  * Port Morphing Popups and Touch Points; map Desktop Grid to Overview.
+  * Read the active accent color from Appearance with a Qt palette fallback.
+
+ -- CharOfString <root@charofstring.cc>  Sat, 07 Nov 2026 19:01:00 -0600
+
 gxde-kwin-x11 (4:6.7.6-4) unstable; urgency=medium
 
   * Restore the Deepin scripting API for setting a window's frame geometry.
