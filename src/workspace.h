@@ -568,6 +568,7 @@ public Q_SLOTS:
     void setupWindowShortcutDone(bool);
 
     void slotEndInteractiveMoveResize();
+    void resetInteractiveMoveResize();
 
 private Q_SLOTS:
     void desktopResized();
