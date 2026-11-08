@@ -702,6 +702,22 @@ void RulesModel::populateRuleList()
                          i18n("Desktop file name"), i18n("Appearance & Fixes"),
                          QIcon::fromTheme("application-x-desktop")));
 
+    addRule(new RuleItem(QLatin1String("disablesplitpreview"),
+                         RulePolicy::SetRule, RuleItem::Boolean,
+                         i18n("Disable split preview"), i18n("Appearance & Fixes"),
+                         QIcon::fromTheme("view-split-left-right"),
+                         i18n("Prevents this window from opening split preview or appearing as a split candidate.")));
+
+    addRule(new RuleItem(QLatin1String("disablecorner"),
+                         RulePolicy::SetRule, RuleItem::Boolean,
+                         i18n("Disable rounded corners"), i18n("Appearance & Fixes"),
+                         QIcon::fromTheme("draw-rectangle")));
+
+    addRule(new RuleItem(QLatin1String("enablewindowshadow"),
+                         RulePolicy::SetRule, RuleItem::Boolean,
+                         i18n("Enable window shadow"), i18n("Appearance & Fixes"),
+                         QIcon::fromTheme("composite-track-on")));
+
     addRule(new RuleItem(QLatin1String("blockcompositing"),
                          RulePolicy::ForceRule, RuleItem::Boolean,
                          i18n("Block compositing"), i18n("Appearance & Fixes"),

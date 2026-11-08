@@ -9,6 +9,7 @@
 #include "config-kwin.h"
 #include "effect/effecthandler.h"
 #include "effect/effectwindow.h"
+#include "rules.h"
 #include "scene/borderradius.h"
 #include "window.h"
 #include "windowstyle/decorationstyle.h"
@@ -87,6 +88,9 @@ QPointF WindowRadius::windowRadius() const
 
 QPointF WindowRadius::effectiveWindowRadius() const
 {
+    if (m_window->rules() && m_window->rules()->checkDisableCorner(false)) {
+        return QPointF();
+    }
     if (m_window->maximizeMode() == MaximizeFull || m_window->isFullScreen() || m_window->isDesktop()) {
         return QPointF();
     }

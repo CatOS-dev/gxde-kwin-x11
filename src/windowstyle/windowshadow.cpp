@@ -6,6 +6,7 @@
 */
 #include "windowshadow.h"
 
+#include "rules.h"
 #include "window.h"
 #include "windowstyle/decorationstyle.h"
 #include "windowstyle/windowradius.h"
@@ -70,11 +71,13 @@ bool WindowShadow::updateWindowShadow()
         hasClientAlpha = x11Window->hasAlpha();
     }
 #endif
+    const bool disableCorner = m_window->rules() && m_window->rules()->checkDisableCorner(false);
+    const bool forceShadow = m_window->rules() && m_window->rules()->checkEnableWindowShadow(false);
     if (m_window->maximizeMode() == MaximizeFull
         || m_window->isFullScreen()
         || m_window->isDesktop()
-        || style->isCancelShadow()
-        || (hasClientAlpha && !m_window->borderRedrawable() && !style->propertyIsValid(DecorationStyle::WindowRadiusProperty))) {
+        || disableCorner
+        || (!forceShadow && (style->isCancelShadow() || (hasClientAlpha && !m_window->borderRedrawable() && !style->propertyIsValid(DecorationStyle::WindowRadiusProperty))))) {
         const bool changed = isValid();
         clear();
         return changed;

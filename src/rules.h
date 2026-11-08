@@ -76,6 +76,9 @@ public:
     bool checkStrictGeometry(bool strict) const;
     QString checkShortcut(QString s, bool init = false) const;
     bool checkDisableGlobalShortcuts(bool disable) const;
+    bool checkDisableSplitpreview(bool disable, bool init = false) const;
+    bool checkDisableCorner(bool disable, bool init = false) const;
+    bool checkEnableWindowShadow(bool enable, bool init = false) const;
     QString checkDesktopFile(QString desktopFile, bool init = false) const;
     Layer checkLayer(Layer layer) const;
     bool checkAdaptiveSync(bool adaptivesync) const;
@@ -188,6 +191,9 @@ public:
     bool applyStrictGeometry(bool &strict) const;
     bool applyShortcut(QString &shortcut, bool init) const;
     bool applyDisableGlobalShortcuts(bool &disable) const;
+    bool applyDisableSplitpreview(bool &disable, bool init) const;
+    bool applyDisableCorner(bool &disable, bool init) const;
+    bool applyEnableWindowShadow(bool &enable, bool init) const;
     bool applyDesktopFile(QString &desktopFile, bool init) const;
     bool applyLayer(enum Layer &layer) const;
     bool applyAdaptiveSync(bool &adaptivesync) const;
@@ -295,6 +301,12 @@ private:
     SetRule shortcutrule;
     bool disableglobalshortcuts;
     ForceRule disableglobalshortcutsrule;
+    bool disablesplitpreview;
+    SetRule disablesplitpreviewrule;
+    bool disablecorner;
+    SetRule disablecornerrule;
+    bool enablewindowshadow;
+    SetRule enablewindowshadowrule;
     QString desktopfile;
     SetRule desktopfilerule;
     bool adaptivesync;

@@ -1589,7 +1589,8 @@ void Window::updateInteractiveMoveResize(const QPointF &global, Qt::KeyboardModi
                     }
                 }
             } else {
-                if (quickTileMode() == QuickTileMode(QuickTileFlag::None) && isResizable()) {
+                if (quickTileMode() == QuickTileMode(QuickTileFlag::None) && isResizable()
+                    && !rules()->checkDisableSplitpreview(false)) {
                     checkQuickTilingMaximizationZones(global.x(), global.y());
                 }
                 if (!m_electricMaximizing) {

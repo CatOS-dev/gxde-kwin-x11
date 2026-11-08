@@ -35,6 +35,7 @@
 #include "opengl/gltexture.h"
 #include "osd.h"
 #include "pointer_input.h"
+#include "rules.h"
 #include "scene/itemrenderer.h"
 #include "scene/windowitem.h"
 #include "scene/workspacescene.h"
@@ -938,7 +939,11 @@ QRectF EffectsHandler::getQuickTileGeometry(EffectWindow *effectWindow, int mode
 
 bool EffectsHandler::isWinAllowSplit(EffectWindow *effectWindow) const
 {
-    return effectWindow && effectWindow->window()->isClient() && effectWindow->window()->isResizable();
+    if (!effectWindow || !effectWindow->window()->isClient() || !effectWindow->window()->isResizable()) {
+        return false;
+    }
+    const auto rules = effectWindow->window()->rules();
+    return !rules || !rules->checkDisableSplitpreview(false);
 }
 
 bool EffectsHandler::isSplitWin(EffectWindow *effectWindow) const

@@ -74,6 +74,9 @@ Rules::Rules()
     , strictgeometryrule(UnusedForceRule)
     , shortcutrule(UnusedSetRule)
     , disableglobalshortcutsrule(UnusedForceRule)
+    , disablesplitpreviewrule(UnusedSetRule)
+    , disablecornerrule(UnusedSetRule)
+    , enablewindowshadowrule(UnusedSetRule)
     , desktopfilerule(UnusedSetRule)
     , adaptivesyncrule(UnusedForceRule)
     , tearingrule(UnusedForceRule)
@@ -159,6 +162,9 @@ void Rules::readFromSettings(const RuleSettings *settings)
     READ_FORCE_RULE(strictgeometry, );
     READ_SET_RULE(shortcut);
     READ_FORCE_RULE(disableglobalshortcuts, );
+    READ_SET_RULE(disablesplitpreview);
+    READ_SET_RULE(disablecorner);
+    READ_SET_RULE(enablewindowshadow);
     READ_SET_RULE(desktopfile);
     READ_FORCE_RULE(layer, );
     READ_FORCE_RULE(adaptivesync, );
@@ -247,6 +253,9 @@ void Rules::write(RuleSettings *settings) const
     WRITE_FORCE_RULE(strictgeometry, Strictgeometry, );
     WRITE_SET_RULE(shortcut, Shortcut, );
     WRITE_FORCE_RULE(disableglobalshortcuts, Disableglobalshortcuts, );
+    WRITE_SET_RULE(disablesplitpreview, Disablesplitpreview, );
+    WRITE_SET_RULE(disablecorner, Disablecorner, );
+    WRITE_SET_RULE(enablewindowshadow, Enablewindowshadow, );
     WRITE_SET_RULE(desktopfile, Desktopfile, );
     WRITE_FORCE_RULE(layer, Layer, );
     WRITE_FORCE_RULE(adaptivesync, Adaptivesync, );
@@ -293,6 +302,9 @@ bool Rules::isEmpty() const
         && strictgeometryrule == UnusedForceRule
         && shortcutrule == UnusedSetRule
         && disableglobalshortcutsrule == UnusedForceRule
+        && disablesplitpreviewrule == UnusedSetRule
+        && disablecornerrule == UnusedSetRule
+        && enablewindowshadowrule == UnusedSetRule
         && desktopfilerule == UnusedSetRule
         && layerrule == UnusedForceRule
         && adaptivesyncrule == UnusedForceRule
@@ -692,6 +704,9 @@ APPLY_FORCE_RULE(autogroupid, AutogroupById, QString)
 APPLY_FORCE_RULE(strictgeometry, StrictGeometry, bool)
 APPLY_RULE(shortcut, Shortcut, QString)
 APPLY_FORCE_RULE(disableglobalshortcuts, DisableGlobalShortcuts, bool)
+APPLY_RULE(disablesplitpreview, DisableSplitpreview, bool)
+APPLY_RULE(disablecorner, DisableCorner, bool)
+APPLY_RULE(enablewindowshadow, EnableWindowShadow, bool)
 APPLY_RULE(desktopfile, DesktopFile, QString)
 APPLY_FORCE_RULE(adaptivesync, AdaptiveSync, bool)
 APPLY_FORCE_RULE(tearing, Tearing, bool)
@@ -751,6 +766,9 @@ bool Rules::discardUsed(bool withdrawn)
     DISCARD_USED_FORCE_RULE(strictgeometry);
     DISCARD_USED_SET_RULE(shortcut);
     DISCARD_USED_FORCE_RULE(disableglobalshortcuts);
+    DISCARD_USED_SET_RULE(disablesplitpreview);
+    DISCARD_USED_SET_RULE(disablecorner);
+    DISCARD_USED_SET_RULE(enablewindowshadow);
     DISCARD_USED_SET_RULE(desktopfile);
     DISCARD_USED_FORCE_RULE(layer);
     DISCARD_USED_FORCE_RULE(adaptivesync);
@@ -900,6 +918,9 @@ CHECK_FORCE_RULE(AutogroupById, QString)
 CHECK_FORCE_RULE(StrictGeometry, bool)
 CHECK_RULE(Shortcut, QString)
 CHECK_FORCE_RULE(DisableGlobalShortcuts, bool)
+CHECK_RULE(DisableSplitpreview, bool)
+CHECK_RULE(DisableCorner, bool)
+CHECK_RULE(EnableWindowShadow, bool)
 CHECK_RULE(DesktopFile, QString)
 CHECK_FORCE_RULE(Layer, Layer)
 CHECK_FORCE_RULE(AdaptiveSync, bool)

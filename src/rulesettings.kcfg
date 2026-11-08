@@ -418,6 +418,37 @@
     <entry name="desktopfile" type="String">
       <label>Desktop file name</label>
     </entry>
+
+    <entry name="disablesplitpreview" type="Bool">
+      <label>Disable split preview</label>
+      <default>false</default>
+    </entry>
+    <entry name="disablesplitpreviewrule" type="Int">
+      <label>Disable split preview rule type</label>
+      <min code="true">Rules::UnusedSetRule</min>
+      <max code="true">static_cast&lt;Rules::SetRule&gt;(Rules::ForceTemporarily)</max>
+      <default code="true">Rules::UnusedSetRule</default>
+    </entry>
+    <entry name="disablecorner" type="Bool">
+      <label>Disable rounded corners</label>
+      <default>false</default>
+    </entry>
+    <entry name="disablecornerrule" type="Int">
+      <label>Disable rounded corners rule type</label>
+      <min code="true">Rules::UnusedSetRule</min>
+      <max code="true">static_cast&lt;Rules::SetRule&gt;(Rules::ForceTemporarily)</max>
+      <default code="true">Rules::UnusedSetRule</default>
+    </entry>
+    <entry name="enablewindowshadow" type="Bool">
+      <label>Enable window shadow</label>
+      <default>false</default>
+    </entry>
+    <entry name="enablewindowshadowrule" type="Int">
+      <label>Enable window shadow rule type</label>
+      <min code="true">Rules::UnusedSetRule</min>
+      <max code="true">static_cast&lt;Rules::SetRule&gt;(Rules::ForceTemporarily)</max>
+      <default code="true">Rules::UnusedSetRule</default>
+    </entry>
     <entry name="desktopfilerule" type="Int">
       <label>Desktop file name rule type</label>
       <min code="true">Rules::UnusedSetRule</min>
