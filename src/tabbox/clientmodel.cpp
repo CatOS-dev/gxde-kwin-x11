@@ -16,6 +16,7 @@
 #include <QIcon>
 #include <QUuid>
 
+#include <algorithm>
 #include <cmath>
 
 namespace KWin
@@ -69,7 +70,7 @@ QVariant ClientModel::data(const QModelIndex &index, int role) const
     case MinimizedRole:
         return client->isMinimized();
     case CloseableRole:
-        return client->isCloseable();
+        return client->isCloseable() && !client->isFirstInTabBox();
     case IconRole:
         if (client->isDesktop()) {
             return QIcon::fromTheme(QStringLiteral("user-desktop"));
@@ -225,6 +226,10 @@ void ClientModel::createClientList(bool partialReset)
             return !client->isMinimized();
         });
     }
+
+    std::stable_partition(m_mutableClientList.begin(), m_mutableClientList.end(), [](Window *window) {
+        return window->isFirstInTabBox();
+    });
 
     if (!m_mutableClientList.isEmpty()
         && tabBox->config().clientApplicationsMode() != TabBoxConfig::AllWindowsCurrentApplication

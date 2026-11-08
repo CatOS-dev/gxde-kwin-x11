@@ -91,6 +91,8 @@ public Q_SLOTS: // METHODS
 
     Q_NOREPLY void showDesktop(bool show);
     bool isOnCurrentDesktop(int window);
+    Q_NOREPLY void previewWindows(const QList<uint> &windowIds);
+    Q_NOREPLY void quitPreviewWindows();
 
 Q_SIGNALS:
     void showingDesktopChanged(bool showing);

@@ -221,6 +221,26 @@ bool DBusInterface::isOnCurrentDesktop(int window)
 #endif
 }
 
+void DBusInterface::previewWindows(const QList<uint> &windowIds)
+{
+    QList<Window *> clients;
+#if KWIN_BUILD_X11
+    for (uint id : windowIds) {
+        if (X11Window *window = workspace()->findClient(Predicate::WindowMatch, id)) {
+            clients.append(window);
+        }
+    }
+#else
+    Q_UNUSED(windowIds)
+#endif
+    workspace()->setPreviewClientList(clients);
+}
+
+void DBusInterface::quitPreviewWindows()
+{
+    workspace()->setPreviewClientList({});
+}
+
 void DBusInterface::showDesktop(bool show)
 {
     workspace()->setShowingDesktop(show, true);

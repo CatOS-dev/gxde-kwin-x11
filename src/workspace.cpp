@@ -250,6 +250,25 @@ void Workspace::init()
                                           QStringLiteral("refreshFonts"),
                                           this, SLOT(reconfigure()));
 
+    const QString deepinWmService = QStringLiteral("com.deepin.wm");
+    const QString deepinWmPath = QStringLiteral("/com/deepin/wm");
+    const QString deepinWmInterface = QStringLiteral("com.deepin.wm");
+    auto bus = QDBusConnection::sessionBus();
+    bus.connect(deepinWmService, deepinWmPath, deepinWmInterface,
+                QStringLiteral("QuickTileWindow"), this, SLOT(tileActiveWindow(uint)));
+    bus.connect(deepinWmService, deepinWmPath, deepinWmInterface,
+                QStringLiteral("WindowMaximize"), this, SLOT(toggleActiveMaximize()));
+    bus.connect(deepinWmService, deepinWmPath, deepinWmInterface,
+                QStringLiteral("TileActiveWindowChanged"), this, SLOT(tileActiveWindow(int)));
+    bus.connect(deepinWmService, deepinWmPath, deepinWmInterface,
+                QStringLiteral("ToggleActiveWindowMaximizeChanged"), this, SLOT(toggleActiveMaximize()));
+
+    connect(this, &Workspace::windowAdded, this, [this](Window *window) {
+        if (previewingClientList() && breaksShowingDesktop(window)) {
+            window->setHiddenByShowDesktop(true);
+        }
+    });
+
     m_activeWindow = nullptr;
 
 #if KWIN_BUILD_X11
@@ -743,6 +762,12 @@ X11Window *Workspace::createX11Window(xcb_window_t windowId, bool is_mapped)
         return nullptr;
     }
     addX11Window(window);
+    if (window->isResizable()) {
+        const uint32_t splitSupported = 1;
+        xcb_change_property(kwinApp()->x11Connection(), XCB_PROP_MODE_REPLACE,
+                            window->window(), atoms->deepin_net_supported,
+                            XCB_ATOM_CARDINAL, 32, 1, &splitSupported);
+    }
     Q_EMIT windowAdded(window);
     return window;
 }
@@ -910,6 +935,12 @@ void Workspace::removeWindow(Window *window)
     }
 
     m_windows.removeAll(window);
+    if (m_previewClients.contains(window)) {
+        QList<Window *> remaining = m_previewClients;
+        remaining.removeAll(window);
+        setPreviewClientList(remaining);
+    }
+    m_previewRestoredMinimized.remove(window);
     if (window == m_delayFocusWindow) {
         cancelDelayFocus();
     }
@@ -982,6 +1013,7 @@ void Workspace::slotReconfigure()
 
 void Workspace::slotCurrentDesktopChanged(VirtualDesktop *oldDesktop, VirtualDesktop *newDesktop)
 {
+    setPreviewClientList({});
     updateWindowVisibilityAndActivateOnDesktopChange(newDesktop);
     Q_EMIT currentDesktopChanged(oldDesktop, m_moveResizeWindow);
 }
@@ -1572,6 +1604,46 @@ bool Workspace::breaksShowingDesktop(Window *window) const
     return !(window->isUnmanaged() || window->isDock() || window->isDesktop() || window->belongsToDesktop() || window->isInputMethod());
 }
 
+void Workspace::setPreviewClientList(const QList<Window *> &clients)
+{
+    QList<Window *> validClients;
+    for (Window *window : clients) {
+        if (window && m_windows.contains(window) && breaksShowingDesktop(window) && !validClients.contains(window)) {
+            validClients.append(window);
+        }
+    }
+    if (m_previewClients == validClients) {
+        return;
+    }
+
+    for (Window *window : std::as_const(m_previewClients)) {
+        if (!validClients.contains(window) && m_previewRestoredMinimized.remove(window) && m_windows.contains(window)) {
+            window->setMinimized(true);
+        }
+    }
+
+    m_previewClients = validClients;
+    for (Window *window : std::as_const(m_windows)) {
+        if (!window->isDeleted() && breaksShowingDesktop(window)) {
+            if (m_previewClients.contains(window) && window->isMinimized()) {
+                window->setMinimized(false);
+                m_previewRestoredMinimized.insert(window);
+            }
+            window->setHiddenByShowDesktop(m_previewClients.isEmpty() ? showing_desktop : !m_previewClients.contains(window));
+        }
+    }
+}
+
+bool Workspace::previewingClientList() const
+{
+    return !m_previewClients.isEmpty();
+}
+
+bool Workspace::previewingClient(const Window *client) const
+{
+    return m_previewClients.contains(const_cast<Window *>(client));
+}
+
 void Workspace::setShowingDesktop(bool showing, bool animated)
 {
     const bool changed = showing != showing_desktop;
@@ -1589,7 +1661,7 @@ void Workspace::setShowingDesktop(bool showing, bool animated)
             continue;
         }
         if (breaksShowingDesktop(window)) {
-            window->setHiddenByShowDesktop(showing_desktop);
+            window->setHiddenByShowDesktop(m_previewClients.isEmpty() ? showing_desktop : !m_previewClients.contains(window));
         }
     }
 

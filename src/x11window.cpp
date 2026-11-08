@@ -30,6 +30,9 @@
 #include "scene/windowitem.h"
 #include "screenedge.h"
 #include "shadow.h"
+#if KWIN_BUILD_TABBOX
+#include "tabbox/tabbox.h"
+#endif
 #include "tiles/tilemanager.h"
 #include "virtualdesktops.h"
 #include "wayland/surface.h"
@@ -710,6 +713,7 @@ bool X11Window::manage(xcb_window_t w, bool isMapped)
 
     m_geometryHints.read();
     getMotifHints();
+    updateFirstInTabBox();
     getWmOpaqueRegion();
     readSkipCloseAnimation(skipCloseAnimationCookie);
     updateShadow();
@@ -2498,6 +2502,22 @@ void X11Window::getMotifHints()
     if (closabilityChanged) {
         Q_EMIT closeableChanged(isCloseable());
     }
+}
+
+void X11Window::updateFirstInTabBox()
+{
+    Xcb::Property property(false, window(), atoms->kde_first_in_window_list,
+                           atoms->kde_first_in_window_list, 0, 1);
+    const bool first = property.toBool(32, atoms->kde_first_in_window_list);
+    if (isFirstInTabBox() == first) {
+        return;
+    }
+    setFirstInTabBox(first);
+#if KWIN_BUILD_TABBOX
+    if (workspace()->windows().contains(this) && workspace()->tabbox()) {
+        workspace()->tabbox()->reset(true);
+    }
+#endif
 }
 
 void X11Window::getIcons()

@@ -21,6 +21,7 @@
 #include <netwm_def.h>
 // Qt
 #include <QList>
+#include <QSet>
 #include <QStringList>
 #include <QTimer>
 // std
@@ -254,6 +255,10 @@ public:
     {
         return m_windows;
     }
+
+    void setPreviewClientList(const QList<Window *> &clients);
+    bool previewingClientList() const;
+    bool previewingClient(const Window *client) const;
 
 #if KWIN_BUILD_X11
     void stackScreenEdgesUnderOverrideRedirect();
@@ -507,6 +512,9 @@ public Q_SLOTS:
     void slotWindowMaximize();
     void slotWindowMaximizeVertical();
     void slotWindowMaximizeHorizontal();
+    void tileActiveWindow(int side);
+    void tileActiveWindow(uint side);
+    void toggleActiveMaximize();
     void slotWindowMinimize();
     void slotWindowShade();
     void slotWindowRaise();
@@ -695,6 +703,8 @@ private:
     QPointF focusMousePos;
 
     QList<Window *> m_windows;
+    QList<Window *> m_previewClients;
+    QSet<Window *> m_previewRestoredMinimized;
     QList<Window *> deleted;
 
     QList<Window *> unconstrained_stacking_order; // Topmost last

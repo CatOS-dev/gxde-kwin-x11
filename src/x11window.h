@@ -369,6 +369,7 @@ private:
     void getWmClientMachine();
     void getMotifHints();
     void getIcons();
+    void updateFirstInTabBox();
     void getWmOpaqueRegion();
     void discardShapeRegion();
     void fetchName();

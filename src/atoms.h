@@ -36,6 +36,7 @@ public:
     Xcb::Atom wm_client_leader;
     Xcb::Atom wm_window_role;
     Xcb::Atom wm_state;
+    Xcb::Atom wm_toggle_split_menu;
     Xcb::Atom sm_client_id;
 
     Xcb::Atom motif_wm_hints;
@@ -62,6 +63,7 @@ public:
     Xcb::Atom net_wm_sync_request_counter;
     Xcb::Atom net_wm_sync_request;
     Xcb::Atom kde_net_wm_shadow;
+    Xcb::Atom kde_first_in_window_list;
     Xcb::Atom kde_color_sheme;
     Xcb::Atom kde_skip_close_animation;
     Xcb::Atom kde_screen_edge_show;
@@ -81,6 +83,8 @@ public:
     Xcb::Atom wl_selection;
     Xcb::Atom primary;
     Xcb::Atom edid;
+    Xcb::Atom deepin_split_window;
+    Xcb::Atom deepin_net_supported;
     Xcb::Atom xwayland_allow_commits;
     Xcb::Atom deepin_scissor_window;
     Xcb::Atom deepin_no_titlebar;

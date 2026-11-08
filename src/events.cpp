@@ -674,6 +674,27 @@ void X11Window::clientMessageEvent(xcb_client_message_event_t *e)
         }
         return;
     }
+    if (e->type == atoms->wm_toggle_split_menu) {
+        if (e->data.data32[0] == 1) {
+            const QRect buttonRect(static_cast<int32_t>(e->data.data32[1]),
+                                   static_cast<int32_t>(e->data.data32[2]),
+                                   static_cast<int32_t>(e->data.data32[3]),
+                                   static_cast<int32_t>(e->data.data32[4]));
+            if (buttonRect.isValid() && buttonRect.width() <= 4096 && buttonRect.height() <= 4096) {
+                workspace()->showSplitMenu(buttonRect, e->window);
+            }
+        } else {
+            workspace()->hideSplitMenu(e->data.data32[1] != 0);
+        }
+        return;
+    }
+    if (e->type == atoms->deepin_split_window) {
+        const uint32_t mode = e->data.data32[0];
+        if (mode <= 0x0f) {
+            setQuickTileFromMenu(QuickTileMode(static_cast<QuickTileFlag>(mode)), e->data.data32[1] != 0);
+        }
+        return;
+    }
 }
 
 void X11Window::configureNotifyEvent(xcb_configure_notify_event_t *e)
@@ -774,6 +795,8 @@ void X11Window::propertyNotifyEvent(xcb_property_notify_event_t *e)
             getSyncCounter();
         } else if (e->atom == atoms->activities) {
             checkActivities();
+        } else if (e->atom == atoms->kde_first_in_window_list) {
+            updateFirstInTabBox();
         } else if (e->atom == atoms->kde_color_sheme) {
             updateColorScheme();
         } else if (e->atom == atoms->kde_screen_edge_show) {

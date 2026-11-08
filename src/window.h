@@ -1038,6 +1038,14 @@ public:
     {
         return m_minimized;
     }
+    bool isFirstInTabBox() const
+    {
+        return m_firstInTabBox;
+    }
+    void setFirstInTabBox(bool first)
+    {
+        m_firstInTabBox = first;
+    }
     virtual bool isMinimizable() const;
 
     bool isSuspended() const;
@@ -1846,6 +1854,7 @@ protected:
     bool m_keepBelow = false;
     bool m_demandsAttention = false;
     bool m_minimized = false;
+    bool m_firstInTabBox = false;
     bool m_suspended = false;
     QTimer *m_autoRaiseTimer = nullptr;
     QTimer *m_shadeHoverTimer = nullptr;

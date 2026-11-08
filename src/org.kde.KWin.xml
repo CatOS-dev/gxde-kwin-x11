@@ -50,6 +50,15 @@
         <arg type="a{sv}" direction="out"/>
     </method>
 
+    <method name="previewWindows">
+        <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
+        <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="QList&lt;uint&gt;"/>
+        <arg name="windowIds" type="au" direction="in"/>
+    </method>
+    <method name="quitPreviewWindows">
+        <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
+    </method>
+
     <property name="showingDesktop" type="b" access="read"/>
     <method name="showDesktop">
         <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>

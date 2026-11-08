@@ -898,6 +898,27 @@ void Workspace::quickTileWindow(QuickTileMode mode)
     m_activeWindow->handleQuickTileShortcut(mode);
 }
 
+void Workspace::tileActiveWindow(int side)
+{
+    if (side < 0 || (side & ~0x0f) != 0) {
+        return;
+    }
+    quickTileWindow(QuickTileMode(static_cast<QuickTileFlag>(side)));
+}
+
+void Workspace::tileActiveWindow(uint side)
+{
+    if (side > 0x0f) {
+        return;
+    }
+    quickTileWindow(QuickTileMode(static_cast<QuickTileFlag>(side)));
+}
+
+void Workspace::toggleActiveMaximize()
+{
+    slotWindowMaximize();
+}
+
 void Workspace::customQuickTileWindow(QuickTileMode mode)
 {
     if (!m_activeWindow) {
